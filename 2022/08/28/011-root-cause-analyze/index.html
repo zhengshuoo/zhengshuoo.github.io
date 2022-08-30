@@ -23,16 +23,16 @@
 <meta property="og:site_name" content="Zshuo">
 <meta property="og:description" content="微服务架构在独立部署、快速交付和灵活扩展上表现出极大的优势，但也会带来新的问题。服务间的调用关系变得异常复杂。当微服务架构出现系统性风险时，排查风险和故障诊断相比于传统的项目会更加困难。根因分析就是跟据服务和端点调用指标快速定位微服务应用问题的一种方法。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://intranet-source.qhimg.com/t019a2ab275f77c2707.png">
-<meta property="og:image" content="http://intranet-source.qhimg.com/t01422ffb12222ec29a.png">
-<meta property="og:image" content="http://intranet-source.qhimg.com/t013759f83d5e2bc49f.png">
-<meta property="og:image" content="http://intranet-source.qhimg.com/t01ac2e7b80b901a888.png">
+<meta property="og:image" content="https://gitee.com/Zzshuo/picture-bed/raw/master/img/20220830214836.png">
+<meta property="og:image" content="https://gitee.com/Zzshuo/picture-bed/raw/master/img/20220830214826.png">
+<meta property="og:image" content="https://gitee.com/Zzshuo/picture-bed/raw/master/img/20220830214816.png">
+<meta property="og:image" content="https://gitee.com/Zzshuo/picture-bed/raw/master/img/20220830214805.png">
 <meta property="article:published_time" content="2022-08-27T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-08-30T13:41:37.101Z">
+<meta property="article:modified_time" content="2022-08-30T13:48:52.045Z">
 <meta property="article:author" content="zshuo">
 <meta property="article:tag" content="rca">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://intranet-source.qhimg.com/t019a2ab275f77c2707.png">
+<meta name="twitter:image" content="https://gitee.com/Zzshuo/picture-bed/raw/master/img/20220830214836.png">
   
   <title>基于skywalking根因分析设计与实现 - Zshuo</title>
 
@@ -276,7 +276,7 @@
             
               <p class="note note-info">
                 
-                  本文最后更新于：5 分钟前
+                  本文最后更新于：几秒前
                 
               </p>
             
@@ -285,7 +285,7 @@
 <span id="more"></span>
 
 <h2 id="要解决的问题"><a href="#要解决的问题" class="headerlink" title="要解决的问题"></a>要解决的问题</h2><p>目前针对单台实例，我们已经有了灵犀诊断通过分析应用的堆、栈信息来快速分析实例问题，但随着微服务应用越来越多，服务间调用越来越复杂，如何快速定位到实例或者服务维度为题成为一个亟需解决的问题。</p>
-<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p><img src="http://intranet-source.qhimg.com/t019a2ab275f77c2707.png" srcset="/img/loading.gif" lazyload alt="image-20220830162456964"></p>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p><img src="https://gitee.com/Zzshuo/picture-bed/raw/master/img/20220830214836.png" srcset="/img/loading.gif" lazyload alt="image-20220830162456964"></p>
 <p>根据上图可以了解到一个应用除了本地调用之外、还会有远程调用（DB、Redis、HTTP、MQ等），而HTTP、DUBBO远程调用又会关联到服务端应用，基于这样的关系，一个完整的微服务调用链路就可以串联起来，我们就可以根据这些关系去做根因分析。</p>
 <p>为了解决实现根因分析，我们需要掌握以下一些概念：</p>
 <h3 id="入口端点"><a href="#入口端点" class="headerlink" title="入口端点"></a>入口端点</h3><p>一个业务服务处理事务入口成为入口端点</p>
@@ -370,7 +370,7 @@
 <p>通过端点即可知道是哪个服务，减少指标label</p>
 <p>与CAT数据格式保持一致，方便后续与CAT打通</p>
 <h3 id="指标收集架构图"><a href="#指标收集架构图" class="headerlink" title="指标收集架构图"></a>指标收集架构图</h3><p>由于要对skywalking数据二次处理，同时又要保证skywalking能正常运行、因此采用流量复制方案，一份流量打到skywalking-oap、一份到skywalking-bridge（自建bridge）。</p>
-<p><img src="http://intranet-source.qhimg.com/t01422ffb12222ec29a.png" srcset="/img/loading.gif" lazyload alt="image-20220830163208808"></p>
+<p><img src="https://gitee.com/Zzshuo/picture-bed/raw/master/img/20220830214826.png" srcset="/img/loading.gif" lazyload alt="image-20220830163208808"></p>
 <ol>
 <li>客户端skywalking-agent通过grpc上报segment数据到skywalking-gateway（Nginx）</li>
 <li>Nginx拦截segment流量转发到skywalking-bridge，其他流量依旧到skywalking-oap</li>
@@ -393,7 +393,7 @@
 </ul>
 <p>方差和标准差都是对一组(一维)数据进行统计的，反映的是一维数组的离散程度。</p>
 <p>标准差和均值的量纲（单位）是一致的，在描述一个波动范围是标准差比方差更方便。比如一个班男生的平均身高是170cm,标准差是10cm,那么方差就是10cm^2。可以进行的比较简便的描述是本班男生身高分布是170±10cm，方差就无法做到这点。</p>
-<h3 id="实现逻辑"><a href="#实现逻辑" class="headerlink" title="实现逻辑"></a>实现逻辑</h3><p><img src="http://intranet-source.qhimg.com/t013759f83d5e2bc49f.png" srcset="/img/loading.gif" lazyload alt="image-20220830163352915"></p>
+<h3 id="实现逻辑"><a href="#实现逻辑" class="headerlink" title="实现逻辑"></a>实现逻辑</h3><p><img src="https://gitee.com/Zzshuo/picture-bed/raw/master/img/20220830214816.png" srcset="/img/loading.gif" lazyload alt="image-20220830163352915"></p>
 <ol>
 <li>计算入口端点前一个小时（可配置）正常数据的标准差A1，要分析时间范围的目标数据标准差A2</li>
 <li>当A2是A1的3倍还多时（可配置），则认为端点抖动，可能有异常，下钻分析Local、Dubbo、Mysql、Redis指标<ol>
@@ -405,7 +405,7 @@
 <li>当B2是B1的3倍还多时（可配置），则认为指标波动，可能有异常</li>
 <li>当指标为Dubbo是，记录客户端端点，继续递归分析</li>
 </ol>
-<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><p><img src="http://intranet-source.qhimg.com/t01ac2e7b80b901a888.png" srcset="/img/loading.gif" lazyload alt="image-20220830163244919"></p>
+<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><p><img src="https://gitee.com/Zzshuo/picture-bed/raw/master/img/20220830214805.png" srcset="/img/loading.gif" lazyload alt="image-20220830163244919"></p>
 <h3 id=""><a href="#" class="headerlink" title=""></a></h3><h2 id="后续工作"><a href="#后续工作" class="headerlink" title="后续工作"></a>后续工作</h2><ul>
 <li><p>考虑接入CAT，丰富指标，增加准确性</p>
 </li>
