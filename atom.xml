@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Zshuo</title>
+  <title>zhengshuo</title>
   
   
-  <link href="https://zzshuo.github.io/atom.xml" rel="self"/>
+  <link href="https://zhengshuo.github.io/atom.xml" rel="self"/>
   
-  <link href="https://zzshuo.github.io/"/>
+  <link href="https://zhengshuo.github.io/"/>
   <updated>2022-08-30T13:48:52.045Z</updated>
-  <id>https://zzshuo.github.io/</id>
+  <id>https://zhengshuo.github.io/</id>
   
   <author>
-    <name>zshuo</name>
+    <name>zhengshuo</name>
     
   </author>
   
@@ -18,8 +18,8 @@
   
   <entry>
     <title>基于skywalking根因分析设计与实现</title>
-    <link href="https://zzshuo.github.io/2022/08/28/011-root-cause-analyze/"/>
-    <id>https://zzshuo.github.io/2022/08/28/011-root-cause-analyze/</id>
+    <link href="https://zhengshuo.github.io/2022/08/28/011-root-cause-analyze/"/>
+    <id>https://zhengshuo.github.io/2022/08/28/011-root-cause-analyze/</id>
     <published>2022-08-27T16:00:00.000Z</published>
     <updated>2022-08-30T13:48:52.045Z</updated>
     
@@ -30,17 +30,17 @@
     
     
     
-    <category term="rca" scheme="https://zzshuo.github.io/categories/rca/"/>
+    <category term="rca" scheme="https://zhengshuo.github.io/categories/rca/"/>
     
     
-    <category term="rca" scheme="https://zzshuo.github.io/tags/rca/"/>
+    <category term="rca" scheme="https://zhengshuo.github.io/tags/rca/"/>
     
   </entry>
   
   <entry>
     <title>Java日志体系</title>
-    <link href="https://zzshuo.github.io/2022/01/27/010-log-system/"/>
-    <id>https://zzshuo.github.io/2022/01/27/010-log-system/</id>
+    <link href="https://zhengshuo.github.io/2022/01/27/010-log-system/"/>
+    <id>https://zhengshuo.github.io/2022/01/27/010-log-system/</id>
     <published>2022-01-26T16:00:00.000Z</published>
     <updated>2022-08-30T13:45:42.895Z</updated>
     
@@ -55,19 +55,19 @@
     
     
     
-    <category term="log" scheme="https://zzshuo.github.io/categories/log/"/>
+    <category term="log" scheme="https://zhengshuo.github.io/categories/log/"/>
     
     
-    <category term="log" scheme="https://zzshuo.github.io/tags/log/"/>
+    <category term="log" scheme="https://zhengshuo.github.io/tags/log/"/>
     
-    <category term="slf4j" scheme="https://zzshuo.github.io/tags/slf4j/"/>
+    <category term="slf4j" scheme="https://zhengshuo.github.io/tags/slf4j/"/>
     
   </entry>
   
   <entry>
     <title>布隆过滤器</title>
-    <link href="https://zzshuo.github.io/2021/08/30/009-bloom-filter/"/>
-    <id>https://zzshuo.github.io/2021/08/30/009-bloom-filter/</id>
+    <link href="https://zhengshuo.github.io/2021/08/30/009-bloom-filter/"/>
+    <id>https://zhengshuo.github.io/2021/08/30/009-bloom-filter/</id>
     <published>2021-08-29T16:00:00.000Z</published>
     <updated>2021-11-10T12:15:11.792Z</updated>
     
@@ -81,19 +81,19 @@
     
     
     
-    <category term="算法" scheme="https://zzshuo.github.io/categories/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://zhengshuo.github.io/categories/%E7%AE%97%E6%B3%95/"/>
     
     
-    <category term="java" scheme="https://zzshuo.github.io/tags/java/"/>
+    <category term="java" scheme="https://zhengshuo.github.io/tags/java/"/>
     
-    <category term="布隆过滤器" scheme="https://zzshuo.github.io/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/"/>
+    <category term="布隆过滤器" scheme="https://zhengshuo.github.io/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/"/>
     
   </entry>
   
   <entry>
     <title>Vue中v-model双向绑定</title>
-    <link href="https://zzshuo.github.io/2021/06/10/008-v-model-binding/"/>
-    <id>https://zzshuo.github.io/2021/06/10/008-v-model-binding/</id>
+    <link href="https://zhengshuo.github.io/2021/06/10/008-v-model-binding/"/>
+    <id>https://zhengshuo.github.io/2021/06/10/008-v-model-binding/</id>
     <published>2021-06-09T16:00:00.000Z</published>
     <updated>2021-11-10T12:15:11.748Z</updated>
     
@@ -107,19 +107,19 @@
     
     
     
-    <category term="vue" scheme="https://zzshuo.github.io/categories/vue/"/>
+    <category term="vue" scheme="https://zhengshuo.github.io/categories/vue/"/>
     
     
-    <category term="vue" scheme="https://zzshuo.github.io/tags/vue/"/>
+    <category term="vue" scheme="https://zhengshuo.github.io/tags/vue/"/>
     
-    <category term="前端" scheme="https://zzshuo.github.io/tags/%E5%89%8D%E7%AB%AF/"/>
+    <category term="前端" scheme="https://zhengshuo.github.io/tags/%E5%89%8D%E7%AB%AF/"/>
     
   </entry>
   
   <entry>
     <title>WeakHashMap-弱引用 HashMap</title>
-    <link href="https://zzshuo.github.io/2021/05/27/007-weakhashmap/"/>
-    <id>https://zzshuo.github.io/2021/05/27/007-weakhashmap/</id>
+    <link href="https://zhengshuo.github.io/2021/05/27/007-weakhashmap/"/>
+    <id>https://zhengshuo.github.io/2021/05/27/007-weakhashmap/</id>
     <published>2021-05-26T16:00:00.000Z</published>
     <updated>2021-11-10T12:15:11.727Z</updated>
     
@@ -134,19 +134,19 @@
     
     
     
-    <category term="java" scheme="https://zzshuo.github.io/categories/java/"/>
+    <category term="java" scheme="https://zhengshuo.github.io/categories/java/"/>
     
     
-    <category term="java" scheme="https://zzshuo.github.io/tags/java/"/>
+    <category term="java" scheme="https://zhengshuo.github.io/tags/java/"/>
     
-    <category term="HashMap" scheme="https://zzshuo.github.io/tags/HashMap/"/>
+    <category term="HashMap" scheme="https://zhengshuo.github.io/tags/HashMap/"/>
     
   </entry>
   
   <entry>
     <title>try-with-resource</title>
-    <link href="https://zzshuo.github.io/2021/05/24/006-try-with-resources/"/>
-    <id>https://zzshuo.github.io/2021/05/24/006-try-with-resources/</id>
+    <link href="https://zhengshuo.github.io/2021/05/24/006-try-with-resources/"/>
+    <id>https://zhengshuo.github.io/2021/05/24/006-try-with-resources/</id>
     <published>2021-05-23T16:00:00.000Z</published>
     <updated>2021-11-10T12:15:11.709Z</updated>
     
@@ -160,17 +160,17 @@
     
     
     
-    <category term="java" scheme="https://zzshuo.github.io/categories/java/"/>
+    <category term="java" scheme="https://zhengshuo.github.io/categories/java/"/>
     
     
-    <category term="java" scheme="https://zzshuo.github.io/tags/java/"/>
+    <category term="java" scheme="https://zhengshuo.github.io/tags/java/"/>
     
   </entry>
   
   <entry>
     <title>dubbo自定义标签路由</title>
-    <link href="https://zzshuo.github.io/2021/05/21/005-dubbo-tag-invoker-chain/"/>
-    <id>https://zzshuo.github.io/2021/05/21/005-dubbo-tag-invoker-chain/</id>
+    <link href="https://zhengshuo.github.io/2021/05/21/005-dubbo-tag-invoker-chain/"/>
+    <id>https://zhengshuo.github.io/2021/05/21/005-dubbo-tag-invoker-chain/</id>
     <published>2021-05-20T16:00:00.000Z</published>
     <updated>2021-11-10T12:15:11.694Z</updated>
     
@@ -184,19 +184,19 @@
     
     
     
-    <category term="dubbo" scheme="https://zzshuo.github.io/categories/dubbo/"/>
+    <category term="dubbo" scheme="https://zhengshuo.github.io/categories/dubbo/"/>
     
     
-    <category term="dubbo" scheme="https://zzshuo.github.io/tags/dubbo/"/>
+    <category term="dubbo" scheme="https://zhengshuo.github.io/tags/dubbo/"/>
     
-    <category term="router" scheme="https://zzshuo.github.io/tags/router/"/>
+    <category term="router" scheme="https://zhengshuo.github.io/tags/router/"/>
     
   </entry>
   
   <entry>
     <title>shardingsphere之mysql数据迁移优化</title>
-    <link href="https://zzshuo.github.io/2021/01/07/004-shardingsphere-sacling-mysql-speed-increase/"/>
-    <id>https://zzshuo.github.io/2021/01/07/004-shardingsphere-sacling-mysql-speed-increase/</id>
+    <link href="https://zhengshuo.github.io/2021/01/07/004-shardingsphere-sacling-mysql-speed-increase/"/>
+    <id>https://zhengshuo.github.io/2021/01/07/004-shardingsphere-sacling-mysql-speed-increase/</id>
     <published>2021-01-06T16:00:00.000Z</published>
     <updated>2021-11-10T12:15:11.676Z</updated>
     
@@ -215,21 +215,21 @@
     
     
     
-    <category term="shardingsphere" scheme="https://zzshuo.github.io/categories/shardingsphere/"/>
+    <category term="shardingsphere" scheme="https://zhengshuo.github.io/categories/shardingsphere/"/>
     
     
-    <category term="shardingsphere" scheme="https://zzshuo.github.io/tags/shardingsphere/"/>
+    <category term="shardingsphere" scheme="https://zhengshuo.github.io/tags/shardingsphere/"/>
     
-    <category term="水平分库" scheme="https://zzshuo.github.io/tags/%E6%B0%B4%E5%B9%B3%E5%88%86%E5%BA%93/"/>
+    <category term="水平分库" scheme="https://zhengshuo.github.io/tags/%E6%B0%B4%E5%B9%B3%E5%88%86%E5%BA%93/"/>
     
-    <category term="mysql" scheme="https://zzshuo.github.io/tags/mysql/"/>
+    <category term="mysql" scheme="https://zhengshuo.github.io/tags/mysql/"/>
     
   </entry>
   
   <entry>
     <title>shardingsphere之scaling</title>
-    <link href="https://zzshuo.github.io/2021/01/06/003-shardingsphere-scaling-introduce/"/>
-    <id>https://zzshuo.github.io/2021/01/06/003-shardingsphere-scaling-introduce/</id>
+    <link href="https://zhengshuo.github.io/2021/01/06/003-shardingsphere-scaling-introduce/"/>
+    <id>https://zhengshuo.github.io/2021/01/06/003-shardingsphere-scaling-introduce/</id>
     <published>2021-01-05T16:00:00.000Z</published>
     <updated>2021-11-10T12:15:11.661Z</updated>
     
@@ -243,19 +243,19 @@
     
     
     
-    <category term="shardingsphere" scheme="https://zzshuo.github.io/categories/shardingsphere/"/>
+    <category term="shardingsphere" scheme="https://zhengshuo.github.io/categories/shardingsphere/"/>
     
     
-    <category term="shardingsphere" scheme="https://zzshuo.github.io/tags/shardingsphere/"/>
+    <category term="shardingsphere" scheme="https://zhengshuo.github.io/tags/shardingsphere/"/>
     
-    <category term="水平分库" scheme="https://zzshuo.github.io/tags/%E6%B0%B4%E5%B9%B3%E5%88%86%E5%BA%93/"/>
+    <category term="水平分库" scheme="https://zhengshuo.github.io/tags/%E6%B0%B4%E5%B9%B3%E5%88%86%E5%BA%93/"/>
     
   </entry>
   
   <entry>
     <title>shardingsphere介绍</title>
-    <link href="https://zzshuo.github.io/2021/01/05/002-shardingsphere-introduce/"/>
-    <id>https://zzshuo.github.io/2021/01/05/002-shardingsphere-introduce/</id>
+    <link href="https://zhengshuo.github.io/2021/01/05/002-shardingsphere-introduce/"/>
+    <id>https://zhengshuo.github.io/2021/01/05/002-shardingsphere-introduce/</id>
     <published>2021-01-04T16:00:00.000Z</published>
     <updated>2021-11-10T12:15:11.648Z</updated>
     
@@ -269,21 +269,21 @@
     
     
     
-    <category term="shardingsphere" scheme="https://zzshuo.github.io/categories/shardingsphere/"/>
+    <category term="shardingsphere" scheme="https://zhengshuo.github.io/categories/shardingsphere/"/>
     
     
-    <category term="shardingsphere" scheme="https://zzshuo.github.io/tags/shardingsphere/"/>
+    <category term="shardingsphere" scheme="https://zhengshuo.github.io/tags/shardingsphere/"/>
     
-    <category term="水平分库" scheme="https://zzshuo.github.io/tags/%E6%B0%B4%E5%B9%B3%E5%88%86%E5%BA%93/"/>
+    <category term="水平分库" scheme="https://zhengshuo.github.io/tags/%E6%B0%B4%E5%B9%B3%E5%88%86%E5%BA%93/"/>
     
   </entry>
   
   <entry>
     <title>Hello World</title>
-    <link href="https://zzshuo.github.io/2021/01/01/001-hello-world/"/>
-    <id>https://zzshuo.github.io/2021/01/01/001-hello-world/</id>
+    <link href="https://zhengshuo.github.io/2021/01/01/001-hello-world/"/>
+    <id>https://zhengshuo.github.io/2021/01/01/001-hello-world/</id>
     <published>2020-12-31T16:00:00.000Z</published>
-    <updated>2022-08-29T19:42:13.000Z</updated>
+    <updated>2022-08-31T10:54:46.086Z</updated>
     
     <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo new <span class="hljs-string">&quot;My New Post&quot;</span><br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo server<br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo generate<br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo deploy<br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p><div class="note note-success">            <p>本文由 zshuo 用户授权转载，版权归原作者所有。</p><p>原文地址：<a href="https://zzshuo.github.io/">https://zzshuo.github.io</a></p>          </div><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><section class="footnotes"><div class="footnote-list"><ol><li><span id="fn:1" class="footnote-text"><span>参考资料 1<a href="#fnref:1" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:2" class="footnote-text"><span>参考资料 2<a href="#fnref:2" rev="footnote" class="footnote-backref"> ↩</a></span></span></li></ol></div></section>]]></content>
     
@@ -295,10 +295,10 @@
     
     
     
-    <category term="hello-world" scheme="https://zzshuo.github.io/categories/hello-world/"/>
+    <category term="hello-world" scheme="https://zhengshuo.github.io/categories/hello-world/"/>
     
     
-    <category term="hello-world" scheme="https://zzshuo.github.io/tags/hello-world/"/>
+    <category term="hello-world" scheme="https://zhengshuo.github.io/tags/hello-world/"/>
     
   </entry>
   
