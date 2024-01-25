@@ -1,0 +1,13 @@
+.markdown-body code {
+  /* background-color: #77ed77c9; */
+  margin: 0.1rem;
+  color: #e83e8c;
+  /* font-weight: 500; */
+}
+
+.markdown-body blockquote {
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  background-color: rgba(174,220,174,0.25);
+  border-color: #5cb85c;
+}

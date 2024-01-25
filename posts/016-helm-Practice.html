@@ -1,0 +1,1003 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=light>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-common/favicon.ico">
+  <link rel="icon" href="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-common/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#24292E">
+  <meta name="author" content="zhengshuo">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="工作需要批量部署同一套ToB（to business）服务到多个k8s cluster&#x2F;namespace 上，经过几百根头发的研究，本文介绍Helm的实践（踩的坑）。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Helm 实践">
+<meta property="og:url" content="https://zhengshuoo.github.io/posts/016-helm-Practice">
+<meta property="og:site_name" content="zhengshuo">
+<meta property="og:description" content="工作需要批量部署同一套ToB（to business）服务到多个k8s cluster&#x2F;namespace 上，经过几百根头发的研究，本文介绍Helm的实践（踩的坑）。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/16.jpg">
+<meta property="article:published_time" content="2023-03-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-15T10:43:31.000Z">
+<meta property="article:author" content="zhengshuo">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Shell">
+<meta property="article:tag" content="Helm">
+<meta property="article:tag" content="K8s">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/16.jpg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+    <meta name="baidu-site-verification" content="codeva-QuFa3S4GHG" /> <meta name="google-site-verification" content="23zD2hFhFjOC98QmAAxxDJ8E2biSoNa_yykpzNAnKgE" />
+  
+  <title>Helm 实践 - zhengshuo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/self.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zhengshuoo.github.io","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"Java"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"464cf562017aa54cff51ff112d8acc34","google":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"gtag":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+    <!-- Baidu Analytics -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?464cf562017aa54cff51ff112d8acc34";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="zhengshuo" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Zhengshuo&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/atom.xml" target="_self">
+                <i class="iconfont icon-rss"></i>
+                <span></span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/16.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Helm 实践"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-03-12 00:00" pubdate>
+          2023年3月12日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          3.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          16 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Kubernetes"
+        id="heading-30136395f01879792198317c11831ea4" role="tab" data-toggle="collapse" href="#collapse-30136395f01879792198317c11831ea4"
+        aria-expanded="true"
+      >
+        Kubernetes
+        <span class="list-group-count">(2)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-30136395f01879792198317c11831ea4"
+           role="tabpanel" aria-labelledby="heading-30136395f01879792198317c11831ea4">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/posts/015-helm-Introduction" title="Helm 介绍"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Helm 介绍</span>
+        </a>
+      
+    
+      
+      
+        <a href="/posts/016-helm-Practice" title="Helm 实践"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">Helm 实践</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Helm 实践</h1>
+            
+              <p id="updated-time" class="note note-info" style="display: none">
+                
+                  
+                    本文最后更新于 2023-03-15T18:43:31+08:00
+                  
+                  
+
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <p>工作需要批量部署同一套ToB（to business）服务到多个k8s cluster/namespace 上，经过几百根头发的研究，本文介绍Helm的实践（踩的坑）。</p>
+<span id="more"></span>
+<p>我们希望可以通过脚本一键、按顺序部署一套服务到指定的k8s cluster/namespace 上</p>
+<h2 id="部署">部署</h2>
+<h3 id="状态检查">状态检查</h3>
+<p>在 <code>kubectl</code>，我们可以用 <code>kubectl rollout status</code> 检查部署的状态。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># kubectl rollout status deployment/probe-busybox -n tenant-test</span><br>Waiting <span class="hljs-keyword">for</span> rollout to finish: 2 out of 3 new replicas have been updated...<br>deployment <span class="hljs-string">&quot;probe-busybox&quot;</span> successfully rolled out<br><br><span class="hljs-comment"># kubectl get deployments deployment/probe-busybox -n tenant-test</span><br>NAME               READY   UP-TO-DATE   AVAILABLE   AGE<br>probe-busybox   3/3     3            3           18s<br></code></pre></td></tr></table></figure>
+<p>那么在这种情况下，Helm 的等价物是什么？</p>
+<p><code>--wait</code> Helm 将等到部署中启动了最少预期数量的 Pod，然后再将发布标记为成功。</p>
+<p><code>--timeout</code> --wait 超时时间时间，默认情况下，超时时间为 300 秒。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ helm upgrade --install --<span class="hljs-built_in">wait</span> --<span class="hljs-built_in">timeout</span> 30s probe-busybox probe-busybox/ -n tenant-test<br>Release <span class="hljs-string">&quot;probe-busybox&quot;</span> does not exist. Installing it now.<br>NAME: probe-busybox<br>LAST DEPLOYED: Tue Mar 14 15:04:38 2023<br>NAMESPACE: tenant-test<br>STATUS: deployed<br>REVISION: 1<br></code></pre></td></tr></table></figure>
+<p>部署按预期成功完成。让我们看看当我们尝试使用失败的部署时会发生什么。设置就绪检查错误端口</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ helm upgrade --install --<span class="hljs-built_in">wait</span> --<span class="hljs-built_in">timeout</span> 30s probe-busybox probe-busybox/ -n tenant-test --<span class="hljs-built_in">set</span> readinessProbe.tcpSocket.port=8081<br>Error: UPGRADE FAILED: timed out waiting <span class="hljs-keyword">for</span> the condition<br><br>$ helm <span class="hljs-built_in">history</span> probe-busybox -n tenant-test<br>REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION                                                        <br>1               Tue Mar 14 15:04:38 2023        deployed        chart-tpl-0.1.0 1.16.0          Install complete                                                   <br>2               Tue Mar 14 15:07:49 2023        failed          chart-tpl-0.1.0 1.16.0          Upgrade <span class="hljs-string">&quot;probe-busybox&quot;</span> failed: timed out waiting <span class="hljs-keyword">for</span> the condition<br><br></code></pre></td></tr></table></figure>
+<h3 id="回滚">回滚</h3>
+<ul>
+<li>手动部署一个正确的 release</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ helm upgrade --install --<span class="hljs-built_in">wait</span> --<span class="hljs-built_in">timeout</span> 30s probe-busybox probe-busybox/ -n tenant-test<br>Release <span class="hljs-string">&quot;probe-busybox&quot;</span> has been upgraded. Happy Helming!<br>NAME: probe-busybox<br>LAST DEPLOYED: Tue Mar 14 15:10:10 2023<br>NAMESPACE: tenant-test<br>STATUS: deployed<br>REVISION: 3<br><br>$ helm <span class="hljs-built_in">history</span> probe-busybox -n tenant-test                                              <br>REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION                                                        <br>1               Tue Mar 14 15:04:38 2023        superseded      chart-tpl-0.1.0 1.16.0          Install complete                                                   <br>2               Tue Mar 14 15:07:49 2023        failed          chart-tpl-0.1.0 1.16.0          Upgrade <span class="hljs-string">&quot;probe-busybox&quot;</span> failed: timed out waiting <span class="hljs-keyword">for</span> the condition<br>3               Tue Mar 14 15:10:10 2023        deployed        chart-tpl-0.1.0 1.16.0          Upgrade complete   <br></code></pre></td></tr></table></figure>
+<ul>
+<li>手动回滚<code>helm rollback</code> 将版本回滚到以前的版本</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">$  helm rollback --<span class="hljs-built_in">wait</span> --<span class="hljs-built_in">timeout</span> 30s probe-busybox 1 -n tenant-test<br>Rollback was a success! Happy Helming!<br><br>$  helm <span class="hljs-built_in">history</span> probe-busybox -n tenant-test         <br>REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION                                                        <br>1               Tue Mar 14 15:04:38 2023        superseded      chart-tpl-0.1.0 1.16.0          Install complete                                                   <br>2               Tue Mar 14 15:07:49 2023        failed          chart-tpl-0.1.0 1.16.0          Upgrade <span class="hljs-string">&quot;probe-busybox&quot;</span> failed: timed out waiting <span class="hljs-keyword">for</span> the condition<br>3               Tue Mar 14 15:10:10 2023        superseded      chart-tpl-0.1.0 1.16.0          Upgrade complete                                                   <br>4               Tue Mar 14 15:13:07 2023        deployed        chart-tpl-0.1.0 1.16.0          Rollback to 1     <br></code></pre></td></tr></table></figure>
+<ul>
+<li>自动回滚<code>--atomic</code>   在升级失败的情况下回滚所做的更改</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ helm upgrade --install --atomic --<span class="hljs-built_in">timeout</span> 30s probe-busybox probe-busybox/ -n tenant-test --<span class="hljs-built_in">set</span> readinessProbe.tcpSocket.port=8081          <br>Error: UPGRADE FAILED: release probe-busybox failed, and has been rolled back due to atomic being <span class="hljs-built_in">set</span>: timed out waiting <span class="hljs-keyword">for</span> the condition<br><br>$ helm <span class="hljs-built_in">history</span> probe-busybox -n tenant-test                                                                                         <br>REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION                                                        <br>1               Tue Mar 14 15:04:38 2023        superseded      chart-tpl-0.1.0 1.16.0          Install complete                                                   <br>2               Tue Mar 14 15:07:49 2023        failed          chart-tpl-0.1.0 1.16.0          Upgrade <span class="hljs-string">&quot;probe-busybox&quot;</span> failed: timed out waiting <span class="hljs-keyword">for</span> the condition<br>3               Tue Mar 14 15:10:10 2023        superseded      chart-tpl-0.1.0 1.16.0          Upgrade complete                                                   <br>4               Tue Mar 14 15:13:07 2023        superseded      chart-tpl-0.1.0 1.16.0          Rollback to 1                                                      <br>5               Tue Mar 14 15:15:10 2023        failed          chart-tpl-0.1.0 1.16.0          Upgrade <span class="hljs-string">&quot;probe-busybox&quot;</span> failed: timed out waiting <span class="hljs-keyword">for</span> the condition<br>6               Tue Mar 14 15:15:43 2023        deployed        chart-tpl-0.1.0 1.16.0          Rollback to 4          <br></code></pre></td></tr></table></figure>
+<h3 id="问题">问题</h3>
+<p>Helm 支持开箱即用的检查部署和自动回滚，但有下面两个问题。</p>
+<ul>
+<li>没有提供类似于<code>kubectl rollout status </code>检查部署的状态,<code>echo $?</code>返回为 0 代表成功的命令，可以通过轮询 <code>helm status</code> 检测 status 为 deployed （有点麻烦）。</li>
+<li>超时时间是全局的，而pod数量并不确定，如果预估超时时间过短，未等到pod全部部署成功就会失败。如果预估超时时间过长，会浪费无谓的等待时间。</li>
+</ul>
+<h2 id="一键部署">一键部署</h2>
+<h3 id="目录结构">目录结构</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash">helm/<br>  bin                     <span class="hljs-comment"># 执行脚本</span><br>  chart-tpl               <span class="hljs-comment"># 模板目录</span><br>    Chart.yaml/           <span class="hljs-comment"># 包含了chart信息的YAML文件</span><br>    templates/            <span class="hljs-comment"># 模板目录</span><br>      deployment.yaml     <span class="hljs-comment"># 创建Kubernetes 工作负载的基本清单</span><br>      service.yaml        <span class="hljs-comment"># 为你的工作负载创建一个 service 终端基本清单。</span><br>      _helpers.tpl        <span class="hljs-comment"># 放置可以通过chart复用的模板辅助对象</span><br>      NOTES.txt           <span class="hljs-comment"># chart的&quot;帮助文本&quot;</span><br>  conf/<br>    secrets/<br>      secrets.probe-busybox.yaml <span class="hljs-comment"># 加密配置</span><br>      ...<br>    values/<br>      common.yaml       <span class="hljs-comment"># 公共配置</span><br>      infra/            <span class="hljs-comment"># 中间件服务</span><br>        apollo-portal.yaml <br>        apollo-adminservice.yaml<br>      other/            <span class="hljs-comment"># 其它服务</span><br>        probe-busybox.yaml<br>releases/<br>  000000/<br>    images/<br>      java_images.txt   <span class="hljs-comment"># 镜像版本信息</span><br></code></pre></td></tr></table></figure>
+<p>为了实现一键批量部署，对 Chart 进行了一些改造，通过创建一个通用的 Chart 模板来支持多个服务的安装。</p>
+<ul>
+<li>通过在 <code>_helpers.tpl</code> 创建模板，并在 yaml 中引用以及流控制等方式创建 yaml 通用模板</li>
+<li>common.yaml 为公共配置，提供默认值以及全局配置，会默认加载。</li>
+<li>service.yaml 位对应服务个性化配置，会覆盖 common.yaml 配置。</li>
+<li>image 版本信息存储在 外部目录中，部署时加载外部 images.txt 中版本信息并通过 <code>--set image.address=xxx </code>设置</li>
+<li>通过部署时传入的名称、版本号、命名空间实现一键批量部署升级到不通 namespace 中</li>
+</ul>
+<h3 id="Yaml-模板">Yaml 模板</h3>
+<p>这里以 service.yaml为例</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs yaml">&#123;&#123;<span class="hljs-bullet">-</span> <span class="hljs-string">if</span> <span class="hljs-string">and</span> <span class="hljs-string">.Values.service</span> <span class="hljs-string">.Values.service.port</span> &#125;&#125;<br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> &#123;&#123; <span class="hljs-string">.Values.name</span> &#125;&#125;<span class="hljs-string">-svc</span><br>  <span class="hljs-attr">labels:</span><br>    &#123;&#123;<span class="hljs-bullet">-</span> <span class="hljs-string">include</span> <span class="hljs-string">&quot;chart-tpl.labels&quot;</span> <span class="hljs-string">.</span> <span class="hljs-string">|</span> <span class="hljs-string">nindent</span> <span class="hljs-number">4</span> &#125;&#125;<br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">type:</span> &#123;&#123; <span class="hljs-string">.Values.service.type</span> &#125;&#125;<br>  <span class="hljs-attr">ports:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">port:</span> &#123;&#123; <span class="hljs-string">.Values.service.port</span> &#125;&#125;<br>      <span class="hljs-attr">targetPort:</span> &#123;&#123; <span class="hljs-string">.Values.service.targetPort</span> &#125;&#125;<br>      <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>      <span class="hljs-attr">name:</span> <span class="hljs-string">tcp-&#123;&#123;</span> <span class="hljs-string">.Values.service.targetPort</span> <span class="hljs-string">&#125;&#125;-&#123;&#123;</span> <span class="hljs-string">.Values.service.port</span> <span class="hljs-string">&#125;&#125;</span><br>  <span class="hljs-attr">selector:</span><br>    &#123;&#123;<span class="hljs-bullet">-</span> <span class="hljs-string">include</span> <span class="hljs-string">&quot;chart-tpl.selectorLabels&quot;</span> <span class="hljs-string">.</span> <span class="hljs-string">|</span> <span class="hljs-string">nindent</span> <span class="hljs-number">4</span> &#125;&#125;<br>&#123;&#123;<span class="hljs-bullet">-</span> <span class="hljs-string">end</span> &#125;&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="公共配置">公共配置</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 默认公共配置，可被 -f APP_NAME.yaml 或 --set 覆盖</span><br>global:<br>  storageClassName: default-sc<br>  imagePullSecrets: [&#123;<span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;123456key&quot;</span>&#125;]<br>  internalSubnetId: subnet-123456<br><br>name: <span class="hljs-string">&quot;&quot;</span><br>replicaCount: 1<br><br><span class="hljs-comment"># 镜像</span><br>image:<br>  address: <span class="hljs-string">&quot;&quot;</span><br>  pullPolicy: IfNotPresent<br><br>resources:<br>  limits:<br>    cpu: 2<br>    memory: 4Gi<br>  requests:<br>    cpu: 0.5<br>    memory: 2Gi<br><br><span class="hljs-built_in">env</span>:<br>  ENV: PRO<br>  IDC: default<br><br>podAnnotations: &#123;&#125;<br><br><span class="hljs-comment"># pvcs</span><br>pvcs: []<br><br><span class="hljs-comment"># 负载均衡</span><br>service:<br>  <span class="hljs-comment"># ClusterIP/LoadBalancer/NodePort</span><br>  <span class="hljs-built_in">type</span>: ClusterIP<br><br><span class="hljs-comment"># 存活检查</span><br>livenessProbe:<br>  successThreshold: 1<br>  failureThreshold: 5<br>  timeoutSeconds: 10<br>  periodSeconds: 60<br>  initialDelaySeconds: 60<br><br><span class="hljs-comment"># 就绪检查</span><br>readinessProbe:<br>  successThreshold: 1<br>  failureThreshold: 5<br>  timeoutSeconds: 10<br>  periodSeconds: 60<br>  initialDelaySeconds: 60<br></code></pre></td></tr></table></figure>
+<h3 id="服务配置">服务配置</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 容器名</span><br>name: <span class="hljs-string">&quot;probe-busybox&quot;</span><br>replicaCount: 1<br><br><span class="hljs-comment"># 镜像</span><br>image:<br>  address: <span class="hljs-string">&quot;&quot;</span><br>  pullPolicy: IfNotPresent<br><br><span class="hljs-comment"># 存活检查</span><br>livenessProbe:<br>  tcpSocket:<br>    port: 8080<br><br><span class="hljs-comment"># 就绪检查</span><br>readinessProbe:<br>  tcpSocket:<br>    port: 8080<br><br><span class="hljs-comment"># 负载均衡</span><br>service:<br>  <span class="hljs-comment"># ClusterIP/LoadBalancer/NodePort</span><br>  <span class="hljs-built_in">type</span>: LoadBalancer<br>  port: 80<br>  targetPort: 8080<br>  internalNetEnabled: <span class="hljs-literal">false</span><br><br>pvcs:<br>  - name: probe-test<br>    storage: 10Gi<br>    <span class="hljs-comment"># ReadWriteOnce/ReadOnlyMany/ReadWriteMany</span><br>    accessModes:<br>      - ReadWriteMany<br>    volumeMounts:<br>      - name: log1<br>        mountPath: /data/logs1<br>        subPath: <span class="hljs-built_in">test</span><br></code></pre></td></tr></table></figure>
+<h3 id="启动脚本">启动脚本</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br><span class="hljs-comment">#处理参数，规范化参数</span><br><br>ARGS=`getopt -o i:r:d -l app-name:,release-version:,namespace:,dry-run,<span class="hljs-built_in">wait</span>,<span class="hljs-built_in">timeout</span>:,<span class="hljs-built_in">set</span>: -- $*`<br><br><span class="hljs-keyword">if</span> [ $? -ne 0 ]; <span class="hljs-keyword">then</span><br>  <span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;Usage: ...&#x27;</span><br>  <span class="hljs-built_in">exit</span> 1<br><span class="hljs-keyword">fi</span><br><span class="hljs-comment">#重新排列参数顺序</span><br><span class="hljs-built_in">set</span> -- <span class="hljs-variable">$&#123;ARGS&#125;</span><br><span class="hljs-comment">#通过shift和while循环处理参数</span><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;ARGS&#125;</span><br><span class="hljs-keyword">while</span> :<br><span class="hljs-keyword">do</span><br>  <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;<span class="hljs-variable">$1</span>&quot;</span> <span class="hljs-keyword">in</span><br>  -i)<br>    APP_IMAGE=$(<span class="hljs-built_in">echo</span> <span class="hljs-variable">$2</span> | <span class="hljs-built_in">tr</span> -d <span class="hljs-string">&quot;&#x27;&quot;</span>)<br>    <span class="hljs-built_in">shift</span> 2<br>    ;;<br>  -r)<br>    RELEASE_VERSION=$(<span class="hljs-built_in">echo</span> <span class="hljs-variable">$2</span> | <span class="hljs-built_in">tr</span> -d <span class="hljs-string">&quot;&#x27;&quot;</span>)<br>    <span class="hljs-built_in">shift</span> 2<br>    ;;<br>  -d)<br>    DEBUG_ENABLE=<span class="hljs-literal">true</span><br>    <span class="hljs-built_in">shift</span> 1<br>    ;;<br>  --dry-run)<br>    COMMAND_OPT=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;COMMAND_OPT&#125;</span> <span class="hljs-variable">$1</span>&quot;</span><br>    <span class="hljs-built_in">shift</span> 1<br>    ;;<br>  --<span class="hljs-built_in">set</span>)<br>    COMMAND_OPT=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;COMMAND_OPT&#125;</span> <span class="hljs-variable">$1</span> <span class="hljs-variable">$2</span>&quot;</span><br>    <span class="hljs-built_in">shift</span> 1<br>    ;;<br>  --<span class="hljs-built_in">wait</span>)<br>    COMMAND_OPT=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;COMMAND_OPT&#125;</span> <span class="hljs-variable">$1</span>&quot;</span><br>    <span class="hljs-built_in">shift</span> 1<br>    ;;<br>  --<span class="hljs-built_in">timeout</span>)<br>    COMMAND_OPT=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;COMMAND_OPT&#125;</span> <span class="hljs-variable">$1</span> <span class="hljs-variable">$2</span>&quot;</span><br>    <span class="hljs-built_in">shift</span> 2<br>    ;;<br>  --atomic)<br>    COMMAND_OPT=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;COMMAND_OPT&#125;</span> <span class="hljs-variable">$1</span>&quot;</span><br>    <span class="hljs-built_in">shift</span> 1<br>    ;;<br>  --)<br>    <span class="hljs-built_in">shift</span><br>    <span class="hljs-built_in">break</span><br>    ;;<br>  *)<br>    <span class="hljs-built_in">shift</span><br>    ;;<br>  <span class="hljs-keyword">esac</span><br><span class="hljs-keyword">done</span><br><br><span class="hljs-built_in">readonly</span> APP_NAME=$(<span class="hljs-built_in">echo</span> <span class="hljs-variable">$1</span> | <span class="hljs-built_in">tr</span> -d <span class="hljs-string">&quot;&#x27;&quot;</span>)<br><span class="hljs-built_in">readonly</span> NAMESPACE=$(<span class="hljs-built_in">echo</span> <span class="hljs-variable">$2</span> | <span class="hljs-built_in">tr</span> -d <span class="hljs-string">&quot;&#x27;&quot;</span>)<br><br><span class="hljs-keyword">if</span> [ ! <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;APP_NAME&#125;</span>&quot;</span> ]; <span class="hljs-keyword">then</span><br>  <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;APP_NAME must not be null&quot;</span><br>  <span class="hljs-built_in">exit</span> 1<br><span class="hljs-keyword">fi</span><br><br><span class="hljs-keyword">if</span> [ <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;RELEASE_VERSION&#125;</span>&quot;</span> ] &amp;&amp; [ <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;APP_IMAGE&#125;</span>&quot;</span> ]; <span class="hljs-keyword">then</span><br>  <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;-r 版本迭代、-i 镜像 不能同时传递&quot;</span><br>  <span class="hljs-built_in">exit</span> 1<br><span class="hljs-keyword">fi</span><br><br><span class="hljs-keyword">if</span> [ ! <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;NAMESPACE&#125;</span>&quot;</span> ]; <span class="hljs-keyword">then</span><br>  <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;NAMESPACE must not be null&quot;</span><br>  <span class="hljs-built_in">exit</span> 1<br><span class="hljs-keyword">fi</span><br><br><span class="hljs-built_in">readonly</span> IMAGE_PREFIX=<span class="hljs-string">&quot;www.xxx.mirrors&quot;</span><br><span class="hljs-built_in">readonly</span> PROJECT_DIR=$(<span class="hljs-built_in">cd</span> <span class="hljs-string">&quot;<span class="hljs-subst">$(dirname <span class="hljs-string">&quot;<span class="hljs-variable">$0</span>&quot;</span>)</span>/../..&quot;</span> || <span class="hljs-built_in">exit</span> 1; <span class="hljs-built_in">pwd</span>)<br><span class="hljs-built_in">readonly</span> HELM_DIR=<span class="hljs-variable">$&#123;PROJECT_DIR&#125;</span>/helm<br><span class="hljs-built_in">readonly</span> RELEASE_DIR=<span class="hljs-variable">$&#123;PROJECT_DIR&#125;</span>/releases/<span class="hljs-variable">$&#123;RELEASE_VERSION&#125;</span><br><br><span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">valuesPrase</span></span>() &#123;<br>  <span class="hljs-built_in">local</span> filepath=<span class="hljs-variable">$1</span><br>  <span class="hljs-built_in">local</span> local_type=$(<span class="hljs-built_in">dirname</span> <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;filepath&#125;</span>&quot;</span> | <span class="hljs-built_in">cut</span> -d <span class="hljs-string">&#x27;/&#x27;</span> -f 2)<br><br>  <span class="hljs-built_in">local</span> local_app_name=$(<span class="hljs-built_in">basename</span> <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;filepath&#125;</span>&quot;</span> | <span class="hljs-built_in">cut</span> -d <span class="hljs-string">&#x27;.&#x27;</span> -f 1)<br>  <span class="hljs-keyword">for</span> image <span class="hljs-keyword">in</span> $(<span class="hljs-built_in">cat</span> <span class="hljs-variable">$&#123;RELEASE_DIR&#125;</span>/images/java_images.txt <span class="hljs-variable">$&#123;RELEASE_DIR&#125;</span>/images/other_images.txt); <span class="hljs-keyword">do</span><br>    temp_app_name=$(<span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;image&#125;</span> | <span class="hljs-built_in">cut</span> -d <span class="hljs-string">&#x27;:&#x27;</span> -f 1)<br>    <span class="hljs-keyword">if</span> [[ <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;local_app_name&#125;</span>&quot;</span> == <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;temp_app_name&#125;</span>&quot;</span> ]]; <span class="hljs-keyword">then</span><br>      helmUpgrade <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;local_app_name&#125;</span>&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;image&#125;</span>&quot;</span><br>      <span class="hljs-built_in">break</span><br>    <span class="hljs-keyword">fi</span><br>  <span class="hljs-keyword">done</span><br>&#125;<br><br><span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">helmUpgrade</span></span>() &#123;<br>  <span class="hljs-built_in">local</span> local_app_name=<span class="hljs-variable">$1</span><br>  <span class="hljs-built_in">local</span> local_image=<span class="hljs-variable">$2</span><br><br>  <span class="hljs-built_in">cd</span> <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_DIR&#125;</span>/conf/values&quot;</span> || <span class="hljs-built_in">exit</span> 1<br>  <span class="hljs-built_in">local</span> local_filepath=$(find . -<span class="hljs-built_in">type</span> f -maxdepth 2 -mindepth 2 -name <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;local_app_name&#125;</span>.yaml&quot;</span>)<br>  [ -z <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;local_filepath&#125;</span>&quot;</span> ] &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;local_app_name&#125;</span> not found&quot;</span> &amp;&amp; <span class="hljs-built_in">exit</span> 1<br>  <span class="hljs-built_in">local</span> local_type=$(<span class="hljs-built_in">dirname</span> <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;local_filepath&#125;</span>&quot;</span> | <span class="hljs-built_in">cut</span> -d <span class="hljs-string">&#x27;/&#x27;</span> -f 2)<br><br>  <span class="hljs-built_in">cd</span> <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_DIR&#125;</span>&quot;</span> || <span class="hljs-built_in">exit</span> 1<br><br>  HELM_COMMAND=<span class="hljs-string">&quot;helm secrets upgrade --install&quot;</span><br>  <span class="hljs-keyword">if</span> [[ <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;DEBUG_ENABLE&#125;</span>&quot;</span> = <span class="hljs-literal">true</span> ]]; <span class="hljs-keyword">then</span><br>    HELM_COMMAND=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_COMMAND&#125;</span> --debug&quot;</span><br>  <span class="hljs-keyword">fi</span><br>  HELM_COMMAND=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_COMMAND&#125;</span> -n <span class="hljs-variable">$&#123;NAMESPACE&#125;</span>&quot;</span><br>  HELM_COMMAND=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_COMMAND&#125;</span> -f ./conf/values/common.yaml&quot;</span><br>  HELM_COMMAND=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_COMMAND&#125;</span> -f ./conf/values/<span class="hljs-variable">$&#123;local_type&#125;</span>/<span class="hljs-variable">$&#123;local_app_name&#125;</span>.yaml&quot;</span><br>  <span class="hljs-built_in">local</span> secret_file=<span class="hljs-string">&quot;./conf/secrets/secrets.<span class="hljs-variable">$&#123;local_app_name&#125;</span>.yaml&quot;</span><br>  <span class="hljs-keyword">if</span> [[ -f <span class="hljs-string">&quot;<span class="hljs-variable">$secret_file</span>&quot;</span> ]]; <span class="hljs-keyword">then</span><br>    HELM_COMMAND=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_COMMAND&#125;</span> -f <span class="hljs-variable">$&#123;secret_file&#125;</span>&quot;</span><br>  <span class="hljs-keyword">fi</span><br>  HELM_COMMAND=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_COMMAND&#125;</span> <span class="hljs-variable">$&#123;local_app_name&#125;</span> ./chart-tpl&quot;</span><br>  HELM_COMMAND=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_COMMAND&#125;</span> --set image.address=<span class="hljs-variable">$&#123;IMAGE_PREFIX&#125;</span>/<span class="hljs-variable">$&#123;local_image&#125;</span>&quot;</span><br>  HELM_COMMAND=<span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_COMMAND&#125;</span> <span class="hljs-variable">$&#123;COMMAND_OPT&#125;</span>&quot;</span><br><br>  <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_COMMAND&#125;</span>&quot;</span><br>  <span class="hljs-built_in">eval</span> <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_COMMAND&#125;</span>&quot;</span><br>&#125;<br><br><span class="hljs-keyword">if</span> [ <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;APP_IMAGE&#125;</span>&quot;</span> ]; <span class="hljs-keyword">then</span><br>  <span class="hljs-comment"># 指定镜像启动</span><br>  helmUpgrade <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;APP_NAME&#125;</span>&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;APP_IMAGE&#125;</span>&quot;</span><br><span class="hljs-keyword">elif</span> [ <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;RELEASE_VERSION&#125;</span>&quot;</span> ]; <span class="hljs-keyword">then</span><br>  <span class="hljs-built_in">cd</span> <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;HELM_DIR&#125;</span>/conf/values&quot;</span> || <span class="hljs-built_in">exit</span> 1<br>  <span class="hljs-comment"># 指定迭代启动</span><br>  <span class="hljs-keyword">if</span> [[ <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;APP_NAME&#125;</span>&quot;</span>  =~ <span class="hljs-string">&quot;-&quot;</span> ]]; <span class="hljs-keyword">then</span><br>    filepath=$(find . -<span class="hljs-built_in">type</span> f -maxdepth 2 -mindepth 2 -name <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;APP_NAME&#125;</span>.yaml&quot;</span>)<br>    [ -z <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;filepath&#125;</span>&quot;</span> ] &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;APP_NAME&#125;</span> not found&quot;</span> &amp;&amp; <span class="hljs-built_in">exit</span> 1<br>    valuesPrase <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;filepath&#125;</span>&quot;</span><br>  <span class="hljs-keyword">elif</span> [[ <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;APP_NAME&#125;</span>&quot;</span>  == <span class="hljs-string">&quot;all&quot;</span> ]]; <span class="hljs-keyword">then</span><br>    filepaths=$(find . -<span class="hljs-built_in">type</span> f -maxdepth 2 -mindepth 2 -name <span class="hljs-string">&quot;*.yaml&quot;</span>)<br>    <span class="hljs-keyword">for</span> filepath <span class="hljs-keyword">in</span> <span class="hljs-variable">$&#123;filepaths&#125;</span><br>    <span class="hljs-keyword">do</span><br>      valuesPrase <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;filepath&#125;</span>&quot;</span><br>    <span class="hljs-keyword">done</span><br>  <span class="hljs-keyword">else</span><br>    filepaths=$(find <span class="hljs-string">&quot;./<span class="hljs-variable">$&#123;APP_NAME&#125;</span>&quot;</span> -<span class="hljs-built_in">type</span> f -name <span class="hljs-string">&quot;*.yaml&quot;</span>)<br>    <span class="hljs-keyword">for</span> filepath <span class="hljs-keyword">in</span> <span class="hljs-variable">$&#123;filepaths&#125;</span><br>    <span class="hljs-keyword">do</span><br>      valuesPrase <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;filepath&#125;</span>&quot;</span><br>    <span class="hljs-keyword">done</span><br>  <span class="hljs-keyword">fi</span><br><span class="hljs-keyword">else</span><br>  <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;-r 版本迭代、-i 镜像 至少需要一个&quot;</span><br>  <span class="hljs-built_in">exit</span> 1<br><span class="hljs-keyword">fi</span><br></code></pre></td></tr></table></figure>
+<h3 id="启动命令">启动命令</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 指定 image 启动</span><br>./helm.sh probe-busybox namespace -i probe-busybox:2302022222<br><br><span class="hljs-comment"># 指定-r迭代启动</span><br><span class="hljs-comment"># 启动单个服务</span><br>./helm.sh probe-busybox namespace -r 230202<br><span class="hljs-comment"># 按类型批量启动服务</span><br>./helm.sh infra namespace -r 230202<br><span class="hljs-comment"># 批量启动所有服务</span><br>./helm.sh all namespace -r 230202<br><br><span class="hljs-comment"># 设置 环境变量</span><br>./helm.sh probe-busybox namespace -r 230202 --<span class="hljs-built_in">set</span> env.ENV=PRO --<span class="hljs-built_in">set</span> env.CLUSTER=a<br><span class="hljs-comment"># 或</span><br>./helm.sh probe-busybox namespace -r 230202 --<span class="hljs-built_in">set</span> env.ENV=PRO,env.CLUSTER=a<br></code></pre></td></tr></table></figure>
+<h2 id="加密">加密</h2>
+<p>由于上述配置是要通过git做版本控制的，实际应用中存在一些环境变量，如密码等不能明文提交到git上，这里使用了helm secrets插件实现加密后提交到git，并在 helm 安装的渲染时解密</p>
+<h3 id="安装">安装</h3>
+<h4 id="helm-secret"><code>helm-secret</code></h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">helm plugin install &lt;https://github.com/futuresimple/helm-secrets&gt;<br><span class="hljs-comment"># 查看</span><br>helm plugin list<br></code></pre></td></tr></table></figure>
+<p>helm-secrets 插件本身并没有任何加密与解密的能力，而它所有的工作，都是通过调用 SOPS 命令来帮助它完成的。</p>
+<p>SOPS 是由 Mozilla 开发的一款开源的文本编辑工具，它支持对 YAML, JSON, ENV, INI 和 BINARY 文本格式的文件进行编辑，并利用 AWS KMS, GCP KMS, Azure Key Vault 或 PGP 等加密方式对编辑的文件进行加密和解密。</p>
+<p>helm-secrets 插件会自动检测并安装 sops 命令到我们的系统中，<code>sops -v</code> 查看。</p>
+<h4 id="GPG">GPG</h4>
+<p>GPG，全名 GNU Privacy Guard，是隶属于 GNU 项目下的一款开源免费的加密工具。目前绝大部分 Linux 发行版本都默认安装了 GPG</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># Ubuntu，Debian 用户</span><br>$ sudo apt install gnupg<br><br><span class="hljs-comment"># CentOS，Fedora，RHEL 用户</span><br>$ sudo yum install gnupg<br><br><span class="hljs-comment"># MacOS 用户</span><br>$ brew install gnupg<br><br>gpg --version<br></code></pre></td></tr></table></figure>
+<h3 id="生成-GPG-密钥对">生成 GPG 密钥对</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">gpg --gen-key<br></code></pre></td></tr></table></figure>
+<p>列出当前系统中的公钥和私钥信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">gpg --list-key<br>gpg --list-secret-keys<br></code></pre></td></tr></table></figure>
+<p>设置秘钥配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 通过环境变量设置秘钥信息</span><br><span class="hljs-built_in">export</span> SOPS_PGP_FP=xxx<br><span class="hljs-comment"># 通过配置文件设置秘钥信息</span><br><span class="hljs-comment"># 每当执行 SOPS 命令时，它都会在当前目录下查找名为 .sops.yaml 的文件作为它的配置文件</span><br>creation_rules:<br>    - pgp: <span class="hljs-string">&quot;13D525EEF0A5FA38F4E78F7900E0160999E3C663&quot;</span><br><span class="hljs-comment"># 删除 PGP 密钥对</span><br>$ gpg --delete-secret-key xxx<br>$ gpg --delete-key xxx<br></code></pre></td></tr></table></figure>
+<h3 id="加解密">加解密</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 加密</span><br>helm secrets enc secrets.probe-busybox.yaml<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 加密前</span><br><span class="hljs-built_in">env</span>:<br>  password: <span class="hljs-built_in">test</span><br><span class="hljs-comment"># 加密后</span><br><span class="hljs-built_in">env</span>:<br>  password:  ENC[AES256_GCM,data:jo8lGGOFZuDY,iv:5Wwt/T0SskFxgWXNRjpoIPq+PIuTGILGIeN/dYOJ/Fg=,tag:ncC3t67xArsXvwwEjAGyLg==,<span class="hljs-built_in">type</span>:str]<br><br>sops:<br>    kms: []<br>    gcp_kms: []<br>    azure_kv: []<br>    lastmodified: <span class="hljs-string">&#x27;2020-04-24T03:48:37Z&#x27;</span><br>    mac: ENC[AES256_GCM,data:uFdXa2qWDSYqaeVsOLZiQos5K611uZYW91ZhLT00MJRb32TxE190RlJjhvl8+/GUOClZcIaU8DejebDP1TVqVFl6wpFqjVM3TLwW0JDm+b+zpCzMje9e17dNjLp7W2awBTPmrF3AXUopLi8oHOuopW89q2gKgFIUW215zjmQET0=,iv:A85xzE6gEXpcwUE6rIvHwHNhqmaCmFOHoYX3Y4qjaGI=,tag:VSB9b9vKLRJg4/klwliJbQ==,<span class="hljs-built_in">type</span>:str]<br>    pgp:<br>    -   created_at: <span class="hljs-string">&#x27;2020-04-24T03:48:35Z&#x27;</span><br>        enc: |<br>            -----BEGIN PGP MESSAGE-----<br><br>            hQIMA8ebLzL57hqOAQ//fOzjkY5tW1/fGd/HWrxsgC02YxAjmHggI2ek5VacdhYP<br>            A9RUYhpipJpBt1LnwHq/B1rV1E4dkOu1lpyAmI9P0qIc+6o0+6jEhqEyjsDQSGn5<br>            kh31oBNYfLq8XpHQg33jOIHpv6/BU7tqzsVMum3HjvnsSrhc3gRtBq5LZoLP/smA<br>            3y36tRLHIGFGqOEwy3CdSiPmsyCKQBEYRK0+7mhXX+ulEMudYXKgXk4qCL1UAB0y<br>            X03K0UATNYp8fRkHqzcpf5nLDNzpCGI0BNbxBQYZdbcP3KFNyKGDFtDaNCcJq9jv<br>            d6yMnioNWYBCtDlrZXlQGzipheWKwZ7JnNa1nmYpCJ3uh6I3mbtkHjljD88QUm6Y<br>            czGAsTDYESJPl5y2wdKdMxHOyE++Ii5LvNr2UD3D+ePYvAIpK1TWjfokCe18ZvvD<br>            v4kHbqbJfffpLCmy0CRVFu/yLnGdZGqniPY/UPPRk28cnKF+fxpX7EmLvzCUgadC<br>            4emIrR6nBUgGvU+fInZrNOccRhYU2S4So45CW2EXW5E4uNj8ayfUgtaUeRwW8pRE<br>            ZMGe1yna7a8UC0syiubC1rr8KHKs8nITfRrelV/BtEkfFDI9sm77AMcaWaAaaBz8<br>            C1L3A1iPhnclDnt3USqOTioLnZs9CjysyNSeiTvehsTC1E3GqgmVbUGob+0Im2fS<br>            XgHaA9fXLtulXkRQGFYpaNEt6r0mkgdq0DXCCfba6EflHg9BvPfrK0dtXrchlCY/<br>            K154U0LkPNHtLBXB0rNwz0Z9aA1CwBdRZ6r8V67SJS1nbsiIvyHfc4dq8n3qhVM=<br>            =HOrp<br>            -----END PGP MESSAGE-----<br>        fp: 00E0160999E3C663<br>    unencrypted_suffix: _unencrypted<br>    version: 3.5.0<br></code></pre></td></tr></table></figure>
+<p>查看解密内容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">helm secrets view secrets.probe-busybox.yaml<br></code></pre></td></tr></table></figure>
+<p>解密后的内容将被存储到新创建的 <code>secrets.probe-busybox.yaml.dec</code> 文件中去。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">helm secrets dec secrets.probe-busybox.yaml<br></code></pre></td></tr></table></figure>
+<h2 id="服务依赖">服务依赖</h2>
+<p>服务中存在依赖关系，因此需要等待前一个依赖的服务部署完成后才能部署后一个服务，比如需要先部署apollo再部署业务服务。</p>
+<p>然而不行的是 包括docker-compose 、kubectl 、helm 在内都没有类似的功能。</p>
+<ul>
+<li>
+<p>docker-compose 的 depends_on 也只是会先启动依赖的服务，再启动自己，并不会等到依赖的服务部署完成。</p>
+</li>
+<li>
+<p>而 k8s 中更没有和 depends_on 类似的语句，我们可以通过entrypoint、initContainer 或者 就绪探针 写一段shell脚本一直循环运行，直到检测到依赖服务都启动完毕才退出，并启动自身容器。但太重了，不符合上面k8s理念。</p>
+</li>
+<li>
+<p>helm dependencies 只是管理依赖并依据依赖创建pod，按照类型和名称排序并启动（详见上一篇helm 依赖顺序），还不如 docker-compose。</p>
+</li>
+</ul>
+<blockquote>
+<p>Kubernetes云原生的理念要求任何应用应该是“独立的”，应用自身是可以处理未连接或者重连接的情况，而不是交由Kuberntest集群层面来做，因为对于k8s来说，Pod或者Container是随时会被调度/重起的，k8s自身会检测所有的pod里的容器并确保它们活着并给他们贴上Healthy的标签，所以应该是尽量独立解耦的，不应该依赖其他服务才可以启动。</p>
+</blockquote>
+<h2 id="总结">总结</h2>
+<p>考虑到第一次部署时，肯定要等到所有服务部署完毕，才会放流量，因此服务启动顺序并不很重要，只要保证最终服务都正常即可。</p>
+<p>服务升级部署时，由于是滚动更新，当新pod就绪检查通过后，旧pod才会销毁，也可以保证服务不会因此中断，只需支持启动失败时自动回滚即可。</p>
+<p>因此服务应尽量独立解耦，服务间存在依赖也不会有明显问题，helm 部署脚本不指定服务启动顺序。</p>
+<p>所有 values 中的值均可用 --set 覆盖，在可以使用命令行一键部署的情况下，还可以为后面 Saas 平台管理数据部署提供扩展。</p>
+<h2 id="参考">参考</h2>
+<section class="footnotes"><div class="footnote-list"><ol><li><span id="fn:1" class="footnote-text"><span><a target="_blank" rel="noopener" href="https://helm.sh/docs/">https://helm.sh/docs/</a>
+<a href="#fnref:1" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:2" class="footnote-text"><span><a target="_blank" rel="noopener" href="https://polarsquad.com/blog/check-your-helm-deployments">https://polarsquad.com/blog/check-your-helm-deployments</a>
+<a href="#fnref:2" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:3" class="footnote-text"><span><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/">https://kubernetes.io/zh-cn/docs/concepts/</a>
+<a href="#fnref:3" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:4" class="footnote-text"><span><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000040199249?utm_source=tag-newest">https://segmentfault.com/a/1190000040199249?utm_source=tag-newest</a>
+<a href="#fnref:4" rev="footnote" class="footnote-backref"> ↩</a></span></span></li></ol></div></section>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Kubernetes/" class="category-chain-item">Kubernetes</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Linux/" class="print-no-link">#Linux</a>
+      
+        <a href="/tags/Shell/" class="print-no-link">#Shell</a>
+      
+        <a href="/tags/Helm/" class="print-no-link">#Helm</a>
+      
+        <a href="/tags/K8s/" class="print-no-link">#K8s</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Helm 实践</div>
+      <div>https://zhengshuoo.github.io/posts/016-helm-Practice</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zhengshuo</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年3月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - 相同方式共享">
+                    <i class="iconfont icon-sa"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/017-doris-on-yarn" title="Doris On Yarn">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Doris On Yarn</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/015-helm-Introduction" title="Helm 介绍">
+                        <span class="hidden-mobile">Helm 介绍</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+    <div id="giscus" class="giscus"></div>
+    <script type="text/javascript">
+      Fluid.utils.loadComments('#giscus', function() {
+        var options = {"repo":"zhengshuoo/zhengshuoo.github.io","repo-id":"R_kgDOH6cdug","category":"Announcements","category-id":"DIC_kwDOH6cdus4CTp9T","theme-light":"light","theme-dark":"dark","mapping":"title","reactions-enabled":1,"emit-metadata":0,"input-position":"top","lang":"zh-CN"};
+        var attributes = {};
+        for (let option in options) {
+          if (!option.startsWith('theme-')) {
+            var key = option.startsWith('data-') ? option : 'data-' + option;
+            attributes[key] = options[option];
+          }
+        }
+        var light = 'light';
+        var dark = 'dark';
+        window.GiscusThemeLight = light;
+        window.GiscusThemeDark = dark;
+        attributes['data-theme'] = document.documentElement.getAttribute('data-user-color-scheme') === 'dark' ? dark : light;
+        for (let attribute in attributes) {
+          var value = attributes[attribute];
+          if (value === undefined || value === null || value === '') {
+            delete attributes[attribute];
+          }
+        }
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://giscus.app/client.js');
+        s.setAttribute('crossorigin', 'anonymous');
+        for (let attribute in attributes) {
+          s.setAttribute(attribute, attributes[attribute]);
+        }
+        var ss = document.getElementsByTagName('script');
+        var e = ss.length > 0 ? ss[ss.length - 1] : document.head || document.documentElement;
+        e.parentNode.insertBefore(s, e.nextSibling);
+      });
+    </script>
+    <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  var relativeDate = function() {
+    var updatedTime = document.getElementById('updated-time');
+    if (updatedTime) {
+      var text = updatedTime.textContent;
+      var reg = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})/;
+      var matchs = text.match(reg);
+      if (matchs) {
+        var relativeTime = moment(matchs[0]).fromNow();
+        updatedTime.textContent = text.replace(reg, relativeTime);
+      }
+      updatedTime.style.display = '';
+    }
+  };
+  Fluid.utils.createScript('https://lib.baomitu.com/moment.js/2.29.4/moment.min.js', function() {
+    if (!'zh-cn'.startsWith('en')) {
+      Fluid.utils.createScript('https://lib.baomitu.com/moment.js/2.29.4/locale/zh-cn.min.js', function() {
+        relativeDate();
+      });
+    } else {
+      relativeDate();
+    }
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

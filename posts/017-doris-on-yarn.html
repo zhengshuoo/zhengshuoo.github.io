@@ -1,0 +1,1007 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=light>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-common/favicon.ico">
+  <link rel="icon" href="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-common/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#24292E">
+  <meta name="author" content="zhengshuo">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本文讲述基于 Yarn 动态的部署 Doris BE 服务，以实现 Doris 和 Hadoop 集群资源利用率最大化。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Doris On Yarn">
+<meta property="og:url" content="https://zhengshuoo.github.io/posts/017-doris-on-yarn">
+<meta property="og:site_name" content="zhengshuo">
+<meta property="og:description" content="本文讲述基于 Yarn 动态的部署 Doris BE 服务，以实现 Doris 和 Hadoop 集群资源利用率最大化。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/17.jpg">
+<meta property="article:published_time" content="2023-05-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-01-25T08:44:25.987Z">
+<meta property="article:author" content="zhengshuo">
+<meta property="article:tag" content="Doris">
+<meta property="article:tag" content="Yarn">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/17.jpg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+    <meta name="baidu-site-verification" content="codeva-QuFa3S4GHG" /> <meta name="google-site-verification" content="23zD2hFhFjOC98QmAAxxDJ8E2biSoNa_yykpzNAnKgE" />
+  
+  <title>Doris On Yarn - zhengshuo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/self.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zhengshuoo.github.io","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"Java"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"464cf562017aa54cff51ff112d8acc34","google":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"gtag":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+    <!-- Baidu Analytics -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?464cf562017aa54cff51ff112d8acc34";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="zhengshuo" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Zhengshuo&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/atom.xml" target="_self">
+                <i class="iconfont icon-rss"></i>
+                <span></span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/17.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Doris On Yarn"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-05-20 00:00" pubdate>
+          2023年5月20日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          2.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          13 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="MPP"
+        id="heading-c097001810b2d5350bcbeb9bb1985736" role="tab" data-toggle="collapse" href="#collapse-c097001810b2d5350bcbeb9bb1985736"
+        aria-expanded="true"
+      >
+        MPP
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-c097001810b2d5350bcbeb9bb1985736"
+           role="tabpanel" aria-labelledby="heading-c097001810b2d5350bcbeb9bb1985736">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/posts/017-doris-on-yarn" title="Doris On Yarn"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">Doris On Yarn</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Doris On Yarn</h1>
+            
+              <p id="updated-time" class="note note-info" style="display: none">
+                
+                  
+                    本文最后更新于 2024-01-25T16:44:25+08:00
+                  
+                  
+
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <p>本文讲述基于 Yarn 动态的部署 Doris BE 服务，以实现 Doris 和 Hadoop 集群资源利用率最大化。</p>
+<span id="more"></span>
+<h2 id="背景">背景</h2>
+<p>目前 Doris 在公司内共部署了 3 个集群，具体信息如下：</p>
+<ul>
+<li>
+<p>测试集群</p>
+<p>提供给 Doris 控制台做建表脚本测试，稳定性保障不高。</p>
+</li>
+<li>
+<p>报表集群</p>
+<p>数据分析人员使用，通过将数仓部分 Hive 表直接同步到该集群，并且通过一些 BI 工具（帆软 、观远 等）做报表分析，数据规模不大，但是稳定性需要严格保障。</p>
+</li>
+<li>
+<p>标签集群</p>
+<p>目前是给离线标签集群替换 es 来作为高效查询使用，因为是线上业务，稳定性也需要严格保障。</p>
+</li>
+</ul>
+<p>自助查询规划通过 Doris 加速查询性能，标签集群最开始是规划给自助查询使用，但是因为数据导入成本太高放弃使用，但还是需要一种方式能够对自助查询提供加速。</p>
+<h2 id="Doris">Doris</h2>
+<p>Doris 1.2.0 后新增两个特性</p>
+<ul>
+<li>
+<p>多源数据目录（Multi-Catalog）</p>
+<p>旨在能够更方便对接外部数据目录，以增强 Doris 的数据湖分析和联邦数据查询能力。构成 Catalog -&gt; Database -&gt; Table 的三层元数据层级，Catalog 可以直接对应到外部数据目录，很方便拿到所有 Database 映射。</p>
+</li>
+<li>
+<p>计算节点（computation）</p>
+<p>计算节点专门处理数据湖这类远程的联邦查询. 原来的 BE 节点类型称为混合节点, 这类节点既能做 SQL 查询, 又有 Tablet 数据存储管理. 而计算节点只能做 SQL 查询, 它不会保存任何数据.</p>
+</li>
+</ul>
+<blockquote>
+<p>混合节点又可以查询，又可以存储，为什么还需要计算节点？</p>
+</blockquote>
+<ul>
+<li>资源隔离差, 两个负载对集群的响应要求不一, 混合部署会有相互的影响.</li>
+<li>集群扩容时, 数据湖查询只需要扩容计算资源, 而目前只能存储计算一起扩容, 导致磁盘使用率变低.</li>
+<li>扩容效率差, 扩容后会启动 Tablet 数据的迁移, 整体过程比较漫长. 而数据湖查询有着明显的高峰低谷, 需要小时级弹性能力.</li>
+</ul>
+<p>同时由于没有多余的资源部署计算节点，计算节点是无状态的，考虑资源合理使用的问题，我们需要探索是否可以基于 Hadoop Yarn 动态的部署 Doris BE 服务，以实现 Doris 和 Hadoop 集群资源的最大化复用, 这里使用 Skein 部署 Doris BE 服务。</p>
+<h2 id="Skein">Skein</h2>
+<p>Skein 是一个用于在 Apache Hadoop 集群上运行和管理分布式应用程序的开源框架</p>
+<h3 id="架构">架构</h3>
+<p><img src="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/20230523030041.png" srcset="/img/loading.gif" lazyload alt="20230523030041"></p>
+<ul>
+<li>
+<p>Application Master（应用程序主节点）：<br>
+Skein 的核心组件是 Application Master，它是一个运行在 YARN 上的 Java 进程，负责解释和执行应用程序的规范（Specification）。Application Master 管理应用程序的整个生命周期，包括资源的申请和分配、容器的启动和监控、任务的调度和执行等。它与 YARN ResourceManager 进行通信，并协调各个任务的执行。</p>
+</li>
+<li>
+<p>Specification（规范）：<br>
+Skein 使用规范来描述和定义应用程序的各个组件、资源需求、启动命令等。规范以 JSON 格式表示，并包含了应用程序的配置信息、依赖项、服务定义等。Application Master 根据规范来启动和管理应用程序。</p>
+</li>
+<li>
+<p>Services（服务）：<br>
+Skein 的规范可以定义多个服务，每个服务代表一个应用程序组件或服务。服务可以是一个用户定义的进程、容器、Web 服务等。Application Master 负责启动、监控和管理这些服务，并提供与它们的交互接口。</p>
+</li>
+<li>
+<p>Container（容器）：<br>
+在 Skein 中，容器是应用程序的基本执行单元。Application Master 通过向 YARN 请求资源来获取容器，并在这些容器中运行应用程序的服务和任务。每个容器都有自己的资源限制和环境设置，可以独立地执行任务。</p>
+</li>
+</ul>
+<p>总体而言，Skein 的架构包括一个 Application Master 负责应用程序的管理，规范定义应用程序的组件和配置，服务代表应用程序的各个组件，容器是执行任务的基本单位。通过这种架构，Skein 实现了在 YARN 上运行和管理分布式应用程序的能力。</p>
+<h3 id="skein-配置文件">skein 配置文件</h3>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs shell">name: doris<br>queue: doris<br>node_label: doris<br>master:<br>  log_level: debug<br>services:<br>  doris.be:<br>    instances: 128<br>    resources:<br>      memory: 64 GiB<br>      vcores: 8<br>    # 服务允许的最大重启次数，-1 以始终重新启动<br>    max_restarts: -1<br>    # 运行服务所需的文件<br>    files:<br>      doris_be: hdfs:///user/bolt/doris/doris-be-1.2.4.tar.gz<br>      doris_sh: hdfs:///user/bolt/doris/doris-be.sh<br>      be_conf: hdfs:///user/bolt/doris/be.conf<br>    # 运行服务的bash脚本<br>    script: |<br>      sh doris_sh $(readlink -f doris_be) $(readlink -f be_conf)<br>      exit $?<br></code></pre></td></tr></table></figure>
+<p>从上述配置问价可看出，这里会部署 128 台 8C64G 的 container 到 Yarn 中的 Doris 队列 Doris 标签节点上，启动脚本为 doris_sh。</p>
+<h3 id="doris-be-sh"><a target="_blank" rel="noopener" href="http://doris-be.sh">doris-be.sh</a></h3>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">#</span><span class="language-bash">!/bin/bash</span><br><br>DORIS_BE_PATH=$1<br>CONF_DIR=$2<br><br>DORIS_VERSION=1.2.4<br>LOG_PATH=&quot;/tmp/doris/log&quot;<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">输出脚本日志到 /doris-on-yarn.log</span><br>function echo_log() &#123;<br>  echo &quot;$(date &quot;+%Y-%m-%d %H:%M:%S&quot;): $@&quot; | tee -a &quot;$&#123;LOG_PATH&#125;/doris-on-yarn.log&quot;<br>&#125;<br><br>mkdir -p &quot;$&#123;LOG_PATH&#125;&quot;<br><br>echo_log &quot;$&#123;DORIS_BE_PATH&#125;&quot;<br>echo_log &quot;$&#123;CONF_DIR&#125;&quot;<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash"><span class="hljs-built_in">set</span> conf</span><br>/bin/cp -f $&#123;CONF_DIR&#125; &quot;$&#123;DORIS_BE_PATH&#125;/apache-doris-be-$&#123;DORIS_VERSION&#125;-bin-x86_64/conf/be.conf&quot;<br>sed -i &#x27;s#export LOG_DIR=&quot;\$&#123;DORIS_HOME&#125;/log&quot;#export LOG_DIR=&quot;/tmp/doris/log&quot;#g&#x27; &quot;$&#123;DORIS_BE_PATH&#125;/apache-doris-be-$&#123;DORIS_VERSION&#125;-bin-x86_64/bin/start_be.sh&quot;<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">Start the BE</span><br>echo_log &quot;-------- Starting Doris BE $(hostname -I) --------&quot;<br>&quot;$&#123;DORIS_BE_PATH&#125;/apache-doris-be-$&#123;DORIS_VERSION&#125;-bin-x86_64/bin/start_be.sh&quot;<br>exit $?<br></code></pre></td></tr></table></figure>
+<ol>
+<li>复制自定义 be.conf 到 doris conf 目录</li>
+<li>container 会销毁，不便于查看日志，因此把日志输出到机器的 <code>/tmp/doris/log</code> 下</li>
+<li>启动 Doris-be</li>
+</ol>
+<blockquote>
+<p>为什么要 exit $?</p>
+</blockquote>
+<p>配置了 <code>max_restarts: -1</code> container 失败一直重启，需要把失败状态码传递到 Application Master，才会重新分配资源重新启动。</p>
+<h3 id="相关命令">相关命令</h3>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">启动命令</span><br>skein submit doris-be.yaml<br><span class="hljs-meta prompt_"># </span><span class="language-bash">查看 application</span><br>skein application ls<br><span class="hljs-meta prompt_"># </span><span class="language-bash">停止</span><br>skein shutdown &lt;APP_ID&gt;<br></code></pre></td></tr></table></figure>
+<h3 id="Yarn-资源分配策略">Yarn 资源分配策略</h3>
+<p>在实践中发现，由于并不是 128 台 Be 都启动了，因此需要去了解 Yarn 的资源分配策略进行优化</p>
+<p>在 YARN 中，Application 的 Container 异常崩溃后不会自动恢复。当一个 Container 发生异常崩溃时，YARN 会将该 Container 标记为失败，并通知 ResourceManager。ResourceManager 会记录该 Container 的失败状态，并可以采取相应的操作，例如重新分配资源或记录日志。</p>
+<p>以下是一般情况下 YARN 重新分配资源的策略：</p>
+<ol>
+<li>资源重新分配：ResourceManager 会尝试重新为失败的 Container 分配资源，以满足 Application 的需求。资源的重新分配可能会在同一节点上或其他可用节点上进行。</li>
+<li>容器优先级：重新分配资源时，ResourceManager 会考虑容器的优先级。较高优先级的容器可能会被优先重新分配资源，以确保重要的任务能够快速恢复。</li>
+<li>容器位置约束：根据配置和调度策略，ResourceManager 可能会尽量将重新分配的容器分配到特定的节点或节点标签上，以满足应用程序的需求。</li>
+<li>容器重试限制：ResourceManager 通常会限制容器的重试次数。如果一个容器连续失败超过预设的重试次数限制，ResourceManager 可能会认为该容器无法成功运行，并不再重新分配资源给它。（目前 doris 失败重试过一段时间不在继续重试原因）</li>
+</ol>
+<h4 id="资源调度器">资源调度器</h4>
+<h5 id="FIFO-Scheduler-先进先出调度器">FIFO Scheduler(先进先出调度器)</h5>
+<p><img src="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/20230523022449.png" srcset="/img/loading.gif" lazyload alt="20230523022449"></p>
+<p>将所有的 Application 按照提交时候的顺序来执行，只有当上一个 Job 执行完成之后后面的 Job 才会按照队列的顺序依次被执行。FIFO 调度器以集群资源独占的方式来运行作业，后面的 Job 会被阻塞。简单但不实用。</p>
+<h5 id="Fair-Scheduler-公平调度器">Fair Scheduler(公平调度器)</h5>
+<p><img src="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/20230523022322.png" srcset="/img/loading.gif" lazyload alt="20230523022322"></p>
+<p>所有的 Job 平均的获取资源。默认情况下，Fair 调度器只是对内存资源做公平的调度和分配。多个队列会平分资源，队列内的 Job 也会平分资源。</p>
+<h5 id="Capacity-Scheduler-容量调度器-（我们使用的）">Capacity Scheduler(容量调度器)（我们使用的）</h5>
+<p><img src="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/image.png.png" srcset="/img/loading.gif" lazyload alt="image.png"></p>
+<p>相关参数：</p>
+<ul>
+<li>
+<p>capacity：队列的资源容量（百分比）。 当系统非常繁忙时，应保证每个队列的容量得到满足，而如果每个队列应用程序较少，可将剩余资源共享给其他队列。</p>
+</li>
+<li>
+<p>maximum-capacity：队列的资源使用上限（百分比）。由于存在资源共享，因此一个队列使用的资源量可能超过其容量，而最多使用资源量可通过该参数限制。（这也是前文提到的关于有任务运行的队列可以占用的资源的最大百分比）</p>
+</li>
+<li>
+<p>user-limit-factor：每个用户最多可使用的队列资源量，默认 1（100%）。</p>
+</li>
+</ul>
+<blockquote>
+<p>假如整个集群有 10 台 100G 机器，其中有 5 台 label 为 doris，剩余 5 台 label 为 other，A 队列配置 label 为 doris，B 队列配置 label 为 other，c 队列配置 label 为 doris 和 other，A 队列 Capacity 为 10%,B 队列 Capacity 为 10%,C 队列 Capacity 为 10%，请问 A 队列实际能使用的容量是多少？</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">A: 5 * 100G * 10% = 50GB<br>B: 5 * 100G * 10% = 50GB<br>C: (5+5) * 100G * 10% = 100GB<br></code></pre></td></tr></table></figure>
+<p>我们实际 Doris 队列原本 Capacity 为 10%，不足以满足 128 个 Be 内存需求，有上面例子可以计算出我们实际需要的 Capacity 为 25%（具体数据不列举），同时运行的 Be 平均 70 个增加到 100 个，理想情况下能够同时运行 128 个 Be（只发现过一次）。</p>
+<p>为什么很难到达 128 个呢，由于端口冲突一台 node 只能起一个 Doris container，ResourceManager 分配是按容量分配资源，而不是按每个 Node 分配一个 container，以及 ResourceManager 容器重试次数限制，因此大部分情况下并不能 128 个都启动。</p>
+<h2 id="总结">总结</h2>
+<p>本文简单介绍了如何基于 Yarn 动态的部署 Doris BE 服务，同时了解到 Yarn 资源分配策略。这对我们理解大数据生态带来一些启发。</p>
+<h2 id="参考">参考</h2>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://jcristharif.com/skein/quickstart.html">https://jcristharif.com/skein/quickstart.html</a></li>
+<li><a target="_blank" rel="noopener" href="https://doris.apache.org/zh-CN/">https://doris.apache.org/zh-CN/</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/27953843">https://zhuanlan.zhihu.com/p/27953843</a></li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/MPP/" class="category-chain-item">MPP</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Doris/" class="print-no-link">#Doris</a>
+      
+        <a href="/tags/Yarn/" class="print-no-link">#Yarn</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Doris On Yarn</div>
+      <div>https://zhengshuoo.github.io/posts/017-doris-on-yarn</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zhengshuo</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年5月20日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - 相同方式共享">
+                    <i class="iconfont icon-sa"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/018-rocketmq-acl" title="RocketMQ ACL">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">RocketMQ ACL</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/016-helm-Practice" title="Helm 实践">
+                        <span class="hidden-mobile">Helm 实践</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+    <div id="giscus" class="giscus"></div>
+    <script type="text/javascript">
+      Fluid.utils.loadComments('#giscus', function() {
+        var options = {"repo":"zhengshuoo/zhengshuoo.github.io","repo-id":"R_kgDOH6cdug","category":"Announcements","category-id":"DIC_kwDOH6cdus4CTp9T","theme-light":"light","theme-dark":"dark","mapping":"title","reactions-enabled":1,"emit-metadata":0,"input-position":"top","lang":"zh-CN"};
+        var attributes = {};
+        for (let option in options) {
+          if (!option.startsWith('theme-')) {
+            var key = option.startsWith('data-') ? option : 'data-' + option;
+            attributes[key] = options[option];
+          }
+        }
+        var light = 'light';
+        var dark = 'dark';
+        window.GiscusThemeLight = light;
+        window.GiscusThemeDark = dark;
+        attributes['data-theme'] = document.documentElement.getAttribute('data-user-color-scheme') === 'dark' ? dark : light;
+        for (let attribute in attributes) {
+          var value = attributes[attribute];
+          if (value === undefined || value === null || value === '') {
+            delete attributes[attribute];
+          }
+        }
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://giscus.app/client.js');
+        s.setAttribute('crossorigin', 'anonymous');
+        for (let attribute in attributes) {
+          s.setAttribute(attribute, attributes[attribute]);
+        }
+        var ss = document.getElementsByTagName('script');
+        var e = ss.length > 0 ? ss[ss.length - 1] : document.head || document.documentElement;
+        e.parentNode.insertBefore(s, e.nextSibling);
+      });
+    </script>
+    <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  var relativeDate = function() {
+    var updatedTime = document.getElementById('updated-time');
+    if (updatedTime) {
+      var text = updatedTime.textContent;
+      var reg = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})/;
+      var matchs = text.match(reg);
+      if (matchs) {
+        var relativeTime = moment(matchs[0]).fromNow();
+        updatedTime.textContent = text.replace(reg, relativeTime);
+      }
+      updatedTime.style.display = '';
+    }
+  };
+  Fluid.utils.createScript('https://lib.baomitu.com/moment.js/2.29.4/moment.min.js', function() {
+    if (!'zh-cn'.startsWith('en')) {
+      Fluid.utils.createScript('https://lib.baomitu.com/moment.js/2.29.4/locale/zh-cn.min.js', function() {
+        relativeDate();
+      });
+    } else {
+      relativeDate();
+    }
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

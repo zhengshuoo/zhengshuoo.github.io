@@ -1,0 +1,1649 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=light>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-common/favicon.ico">
+  <link rel="icon" href="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-common/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#24292E">
+  <meta name="author" content="zhengshuo">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Linux 常用命令：能解决 95% 以上的问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux 常用命令">
+<meta property="og:url" content="https://zhengshuoo.github.io/posts/012-linux-common-commands">
+<meta property="og:site_name" content="zhengshuo">
+<meta property="og:description" content="Linux 常用命令：能解决 95% 以上的问题">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/12.jpg">
+<meta property="article:published_time" content="2023-01-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-13T16:05:02.000Z">
+<meta property="article:author" content="zhengshuo">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Shell">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/12.jpg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+    <meta name="baidu-site-verification" content="codeva-QuFa3S4GHG" /> <meta name="google-site-verification" content="23zD2hFhFjOC98QmAAxxDJ8E2biSoNa_yykpzNAnKgE" />
+  
+  <title>Linux 常用命令 - zhengshuo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/self.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zhengshuoo.github.io","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"Java"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"464cf562017aa54cff51ff112d8acc34","google":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"gtag":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+    <!-- Baidu Analytics -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?464cf562017aa54cff51ff112d8acc34";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="zhengshuo" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Zhengshuo&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/atom.xml" target="_self">
+                <i class="iconfont icon-rss"></i>
+                <span></span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/12.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Linux 常用命令"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-01-17 00:00" pubdate>
+          2023年1月17日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          4.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          21 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Linux"
+        id="heading-edc9f0a5a5d57797bf68e37364743831" role="tab" data-toggle="collapse" href="#collapse-edc9f0a5a5d57797bf68e37364743831"
+        aria-expanded="true"
+      >
+        Linux
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-edc9f0a5a5d57797bf68e37364743831"
+           role="tabpanel" aria-labelledby="heading-edc9f0a5a5d57797bf68e37364743831">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/posts/012-linux-common-commands" title="Linux 常用命令"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">Linux 常用命令</span>
+        </a>
+      
+    
+      
+      
+        <a href="/posts/013-crontab-and-logrotate-log-clean" title="Linux 使用 Crontab + Logrotate 实现日志分割"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Linux 使用 Crontab + Logrotate 实现日志分割</span>
+        </a>
+      
+    
+      
+      
+        <a href="/posts/014-linux-command-params" title="Linux 解析命令行参数"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">Linux 解析命令行参数</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Linux 常用命令</h1>
+            
+              <p id="updated-time" class="note note-info" style="display: none">
+                
+                  
+                    本文最后更新于 2023-03-14T00:05:02+08:00
+                  
+                  
+
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <p>Linux 常用命令：能解决 95% 以上的问题</p>
+<span id="more"></span>
+<h2 id="Linux-文件系统">Linux 文件系统</h2>
+<ul>
+<li><code>/var</code>：包含在正常操作中被改变的文件、假脱机文件、记录文件、加锁文件、临时文件和页格式化文件等。</li>
+<li><code>/home</code>：包含用户的文件：参数设置文件、个性化文件、文档、数据、EMALL、缓存数据等，每增加一个用户，系统就会根据其用户名在 home 目录下新建和其他用户同名的文件夹，用于保存其用户配置。</li>
+<li><code>/proc</code>：包含虚幻的文件，他们实际上并不存在于磁盘上，也不占用任何空间（用 ls-l 可以显示它们的大小）当查看这些文件时，实际上是在访问存在内存中的信息，这些信息用于访问系统。</li>
+<li><code>/bin</code>：包含系统启动时需要的执行文件（二进制），这些文件可以被普通用户使用。</li>
+<li><code>/etc</code>：为操作系统的配置文件目录（防火墙、启动项）</li>
+<li><code>/root</code>：为系统管理员（也叫超级用户或根用户）的 Home 目录。</li>
+<li><code>/dev</code>：为设备目录，Linux 下设备被当成文件，这样一来硬件被抽象化、便于读写、网络共享以及需要临时装载到文件系统中，正常情况下，设备会有一个独立的子目录，这些设备的内容会出现在独立的子目录下。</li>
+</ul>
+<h2 id="Linux-命令操作">Linux 命令操作</h2>
+<ul>
+<li>
+<p><strong>查看当前目录命令：<code>pwd</code></strong></p>
+</li>
+<li>
+<p><strong>打开文件夹命令：<code>cd</code></strong></p>
+</li>
+<li>
+<ul>
+<li>打开指定文件夹：<code>cd [目录名称]</code></li>
+<li>打开当前用户的根目录：<code>cd ~</code></li>
+<li>返回上级目录：<code>cd …</code></li>
+<li>返回进入目录：<code>cd -</code></li>
+<li>打开根目录：<code>cd /</code></li>
+</ul>
+</li>
+<li>
+<p><strong>浏览目录下的文件列表命令：<code>ls</code></strong></p>
+</li>
+<li>
+<ul>
+<li>以列的方式查看当前目录下的文件列表：<code>ls -l</code></li>
+<li>查看当前目录下所有的文件（包括隐藏文件）：<code>ls -a</code></li>
+<li>以列表的方式查看当前目录下的所有文件：<code>ls -la</code></li>
+</ul>
+</li>
+<li>
+<p><strong>创建文件目录命令：<code>mkdir</code></strong></p>
+</li>
+<li>
+<ul>
+<li>新建文件目录：<code>mkdir 文件夹名称</code></li>
+<li>递归新建多级目录：<code>mkdir -p 文件夹名称</code></li>
+<li>例如在用户目录下新建 test 目录，命令这样写：<code>mkdir -p test/test1/test2/test3</code> 递归新建多级目录的写法</li>
+</ul>
+</li>
+<li>
+<p><strong>删除文件目录命令：<code>rmkdir</code></strong></p>
+</li>
+<li>
+<ul>
+<li>删除指定目录：<code>rmkdir 目录名称</code></li>
+<li>递归删除指定目录及中间目录：<code>rmdir -p 目录名称</code> 这里没有写错，没有字母 k</li>
+</ul>
+</li>
+<li>
+<p><strong>删除文件或者目录命令：<code>rm</code></strong></p>
+</li>
+<li>
+<ul>
+<li>常用命令：<code>rm -rf [目录或文件]</code> <code>rm -ri [目录或文件]</code></li>
+<li>强制删除文件或目录：<code>rm -rf 目录或者文件</code></li>
+<li>在删除前询问是否确认删除：<code>rm -ri 目录或文件</code></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>因为强制删除的后果不太好，一般不建议使用 <code>rm -rf</code> 进行文件删除</p>
+<p>rm 命令中不跟 r 参数，无法删除目录，只能删除文件</p>
+</blockquote>
+<ul>
+<li>
+<p><strong>复制文件或目录命令：<code>cp</code></strong></p>
+</li>
+<li>
+<ul>
+<li>递归复制目录1下的所有的文件和文件夹到目录2：<code>cp -r [目录1][目录2]</code></li>
+<li>执行复制操作时覆盖原有目录前询问用户：<code>cp -ri [目录1][目录2]</code></li>
+</ul>
+</li>
+<li>
+<p><strong>移动文件、修改文件名命令：<code>mv</code></strong></p>
+</li>
+<li>
+<ul>
+<li>将文件夹1名称更改为文件夹2：<code>mv 文件1 文件2</code> (给文件更名)</li>
+<li>将目录1的文件移动到目录2：<code>mv 目录2 目录2</code> (将目录1的文件移动到目录2)</li>
+</ul>
+</li>
+<li>
+<p><strong>创建文件命令：<code>touch</code></strong></p>
+</li>
+<li>
+<ul>
+<li>touch 文件名称</li>
+</ul>
+</li>
+<li>
+<p><strong>查看、编辑文件命令：<code>vi</code></strong></p>
+</li>
+<li>
+<ul>
+<li>
+<p>vi 命令为 UNIX 操作系统或者类 UNIX 操作系统都有具有的功能强大的文件编辑命令，用户输入 vi ++ 文件名，便可以进入 vi 模式进行文件内容的查看和编辑，如果文件已经存在，则直接打开文件，如果文件不存在，则系统将打开一个全新的空文件。</p>
+</li>
+<li>
+<p>vi 的三种模式：</p>
+<ol>
+<li>
+<p>命令模式</p>
+<ul>
+<li>
+<p>当用户使用 vi 命令打开文件后，则进入命令模式，用户可以输入命令来执行各种功能。</p>
+<table>
+<thead>
+<tr>
+<th><strong>取值</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L</td>
+<td>光标移至屏幕最后一行</td>
+</tr>
+<tr>
+<td>space</td>
+<td>光标右移一个字符</td>
+</tr>
+<tr>
+<td>backspace</td>
+<td>光标左移一个字符</td>
+</tr>
+<tr>
+<td>N+</td>
+<td>光标向上移动 N 行</td>
+</tr>
+<tr>
+<td>n+</td>
+<td>光标移下移 n 行</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+<li>
+<p>输入模式</p>
+<ul>
+<li>
+<p>如果用户要对文件做修改，则可以使用下面几种命令，进入输入模式，用户进入输入模式之后，可以任意修改文件，除了 Esc 键外，用户输入的任何字符都会被作为内容写入文件中，用户输入 Esc 可以对文件进行相关操作。</p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a、i、r、o、A、I、R、O</td>
+<td>编辑模式</td>
+</tr>
+<tr>
+<td>dd</td>
+<td>删除当前光标</td>
+</tr>
+<tr>
+<td>ndd</td>
+<td>删除 n 行</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+<li>
+<p>末行模式</p>
+<ul>
+<li>
+<p>如果用户完成编辑命令，则可以按照 esc + “:” 进入末行模式，用户可以对文件内容继续进行搜索，也可以输入 “:wq!” 进行文件保存并退出，或者输入 “:q!” 强制退出文件编辑。</p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>:wq!</td>
+<td>保存并退出</td>
+</tr>
+<tr>
+<td>:q!</td>
+<td>强制退出</td>
+</tr>
+<tr>
+<td>: s/字符串 1/字符串 2</td>
+<td>将文件中出现的字符串 1 替换为字符串2</td>
+</tr>
+<tr>
+<td>:set nu</td>
+<td>显示所有行号</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>查看、编辑文件命令：<code>cat</code></strong></p>
+</li>
+<li>
+<ul>
+<li>显示一个小的文件的内容：<code>cat 文件名称</code></li>
+<li>创建并打开一个新的文件：<code>cat &gt; 文件名称</code></li>
+</ul>
+</li>
+<li>
+<p><strong>查看文件开头内容命令：<code>head</code></strong></p>
+</li>
+<li>
+<ul>
+<li>
+<p><code>head [参数] [文件名]</code></p>
+<ul>
+<li>
+<p>例如，使用 head 命令显示某个文件开始的 n 行数据：<code>head -n 文件名称</code></p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-n</td>
+<td>&lt; 行数 &gt; 显示的行数</td>
+</tr>
+<tr>
+<td>默认</td>
+<td>默认显示文件前 10 行数据</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>查看文件结尾内容命令：<code>tail</code></strong></p>
+</li>
+<li>
+<ul>
+<li>动态加载某个文件的内容（常用于查看日志文件）：<code>tail -f 文件名称</code></li>
+<li>展示文件最后几行的数据：<code>tail -n 行数文件名称</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="Linux-权限管理">Linux 权限管理</h2>
+<h3 id="用户和用户组">用户和用户组</h3>
+<p>用户是指在一个操作系统中，一系列权限的集合体，操作人员通过用户名和口令可以在系统中执行某一些被允许的操作。不同的用户可以具有不同的权限。Linux 操作系统中每个用户都具有唯一标识 UID，当使用命令创建用户时，如果不指定用户的 UID，则系统将自动为其分配 UID。</p>
+<p>用户组就是具有相同特征的用户的集合体，在 Linux 系统中，每一个用户都属于至少一个用户组。Linux 操作系统中每个用户分组都具有唯一标识 GID，当使用命令创建用户组时，如果不指定用户组的 GID，则系统将自动为其分配 GID。当使用 -u 指定用户 id 时，用户 id 尽量大于500，以免冲突。因为 Linux 操作系统安装后，会默认建立一些用户，所以可能会占用 500 之内的 id 号。</p>
+<p>Linux 权限机制有以下特点：</p>
+<ul>
+<li>系统有一个权限最大的用户，其名称为 root ，root 用户属于 root 用户组。</li>
+<li>系统默认只有 root 权限可以添加和删除用户。</li>
+<li>添加用户之后，如果没有给用户指定用户组，则系统会为用户添加一个同名的用户组，用户属于该组。</li>
+<li>root 切换到普通用户无需登录，普通用户切换到 root 用户需要登陆。</li>
+<li>root 可以给用户赋予和回收某一个文件的读、写、执行的权限。</li>
+</ul>
+<h3 id="用户操作命令">用户操作命令</h3>
+<ul>
+<li>
+<p><strong>切换用户命令：<code>su</code></strong></p>
+</li>
+<li>
+<ul>
+<li><code>su [用户名]</code> 或者 <code>su -[用户名]</code></li>
+<li><code>su[用户名]</code>和 <code>su -[用户名]</code>都可以切换用户，前者类似于临时切换用户，当使用该命令进行切换新用户时，用户配置仍然沿用原来的用户配置，如环境变量、系统变量等。而后者进行切换用户时，环境变量、系统设置全部切换成新用户的用户配置。</li>
+</ul>
+</li>
+<li>
+<p><strong>查看当前登陆用户命令：<code>whoami</code></strong></p>
+</li>
+<li>
+<p><strong>查看当前用户所属分组命令：<code>groups</code></strong></p>
+</li>
+<li>
+<p><strong>查看当前用户 UID 和 GID 命令：<code>id</code></strong></p>
+</li>
+<li>
+<p><strong>添加新用户命令：<code>useradd</code></strong></p>
+<ul>
+<li>
+<p>在 Linux 操作系统中添加用户：<code>useradd 用户名</code></p>
+<p>在 Linux 操作系统中添加用户并指定用户 UID：<code>useradd -u</code> 指定的 UID 用户名</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-c</td>
+<td>代表 comment 指定一段注释性描述</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>指定用户主目录</td>
+</tr>
+<tr>
+<td>-g</td>
+<td>指定用户所属的用户组</td>
+</tr>
+<tr>
+<td>-G</td>
+<td>指定用户所属的附加组</td>
+</tr>
+<tr>
+<td>-u</td>
+<td>指定用户的用户好</td>
+</tr>
+<tr>
+<td>缺省</td>
+<td>直接添加用户</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong>修改用户密码命令：<code>passwd</code></strong></p>
+<ul>
+<li>
+<p>例如：修改当前用户名为 sang 的用户密码：<code>passwd sang</code></p>
+</li>
+<li>
+<p>在添加用户之后，只有为其设置密码，用户才能登陆</p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-d</td>
+<td>删除密码。仅有系统管理员才能使用</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>强制执行</td>
+</tr>
+<tr>
+<td>-k</td>
+<td>设置只有密码过期后才能更新</td>
+</tr>
+<tr>
+<td>-l</td>
+<td>锁着密码</td>
+</tr>
+<tr>
+<td>-s</td>
+<td>列出面膜的相关信息，仅有系统管理员才能使用</td>
+</tr>
+<tr>
+<td>-u</td>
+<td>解开已上锁的账号</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>删除用户命令：<code>userdel</code></strong></p>
+</li>
+<li>
+<ul>
+<li>
+<p>删除用户：<code>userdel 用户名</code></p>
+</li>
+<li>
+<p>删除用户并同时删除其登陆信息：<code>userdel -r 用户名</code></p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-r</td>
+<td>删除用户以及其登陆日志等信息</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>强制删除用户，即使用户已经登陆</td>
+</tr>
+<tr>
+<td>缺省</td>
+<td>直接删除用户</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>修改用户信息命令：<code>usermod</code></strong></p>
+</li>
+<li>
+<ul>
+<li>
+<p>语法：<code>usermod [选项] [参数] [用户名]</code></p>
+</li>
+<li>
+<p>修改用户登录名：<code>usermod -l 新用户名 旧用户名</code></p>
+</li>
+<li>
+<p>修改用户所属分组：<code>usermod -g 新组名称 用户名</code></p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-c</td>
+<td>修改用户账号的备注文字</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>修改用户登陆时的目录</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>修改账号的有效期</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>修改密码过期后多少天关闭账号</td>
+</tr>
+<tr>
+<td>-g</td>
+<td>修改用户所属的群组</td>
+</tr>
+<tr>
+<td>-G</td>
+<td>修改用户所属附加组</td>
+</tr>
+<tr>
+<td>-l</td>
+<td>修改用户账号名称</td>
+</tr>
+<tr>
+<td>-L</td>
+<td>锁定用户密码，使密码无效</td>
+</tr>
+<tr>
+<td>-u</td>
+<td>修改用户 id</td>
+</tr>
+<tr>
+<td>-U</td>
+<td>解除密码锁定</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>添加用户组命令：<code>groupadd</code></strong></p>
+</li>
+<li>
+<ul>
+<li>
+<p>语法：<code>groupadd [选项] [组名称]</code></p>
+</li>
+<li>
+<p>修改用户登陆名：<code>groupadd 组名</code></p>
+</li>
+<li>
+<p>修改用户所属分组：<code>groupadd -g 组 GID 组名</code></p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-g</td>
+<td>指定工作组的 id</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>创建系统工作组</td>
+</tr>
+<tr>
+<td>-o</td>
+<td>允许添加组 ID 不唯一的工作组</td>
+</tr>
+<tr>
+<td>缺省</td>
+<td>添加用户分组</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="权限操作">权限操作</h3>
+<p>Linux 操作系统为文件定义了读、写、执行三种权限，不同的用户或者用户组可以具有不同的权限，系统采用 “r”、“w”、“x” 来分别表示文件的读、写、执行权限。使用 ls -l 命令可以查看到用户在当前目录或者文件的操作权限。</p>
+<p>如：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">drwxr</span> -xr -x. <span class="hljs-number">2</span> root root <span class="hljs-number">4096</span> Sep <span class="hljs-number">23</span> <span class="hljs-number">2011</span> bin<br></code></pre></td></tr></table></figure>
+<p>从左至右分别表示如下含义：</p>
+<ul>
+<li><code>d</code>：代表 bin 数目目录而不是文件</li>
+<li><code>rwx</code>：代表拥有者具有读、写、执行的权限</li>
+<li><code>r -x</code>：代表同组用户具有读、执行的权限，但是没有写权限</li>
+<li><code>r -x</code>：代表其他组用户具有读、执行权限，没有写权限</li>
+</ul>
+<h4 id="常用的变更权限命令为：chmod">常用的变更权限命令为：<code>chmod</code></h4>
+<p>语法：<code>chmod [选项] [参数]</code></p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-c</td>
+<td>显示指令执行过程，但只返回更改的部分</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>不显示错误信息</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>递归授权</td>
+</tr>
+<tr>
+<td>-v</td>
+<td>显示指令执行过程</td>
+</tr>
+</tbody>
+</table>
+<p>chmod 的参数可以分为两种，分别是权限模式和数字模式。</p>
+<p><strong>权限模式：</strong></p>
+<p>权限模式使用 u、g、o 分别代表拥有者、同组用户、其他组用户，使用 + 和一代表赋予和收回权限，使用 r、w、x 代表读、写、执行权限。</p>
+<p>例如：将文件01的执行权限给当前用户，写权限赋给用户所在的用户组和其他用户。</p>
+<figure class="highlight tp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs tp">chmod -r U+<span class="hljs-keyword">X</span>,G+<span class="hljs-keyword">W</span> F<span class="hljs-number">01</span><br></code></pre></td></tr></table></figure>
+<p>例如：将文件 f01 的读、写、执行的权限赋给当前用户，将读、写权限赋给用户所在的用户组和其他用户。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">chmod -r <span class="hljs-attribute">u</span>=rwx,g=rw,o=rw f01<br></code></pre></td></tr></table></figure>
+<p><strong>数字模式：</strong></p>
+<p>为了简化授权步骤，用户也可以采用数字模式进行授权，使用二进制的形式代表 r、w、x 三种权限，如 <code>101 (5) =r -x</code>，<code>111 (7) =rwx</code>，<code>100 (3) =r- -</code></p>
+<p>例如：将文件 f01 的读、写、执行的权限赋给当前用户，将读和执行权限赋给用户组、将写和执行权限赋给其他用户。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">chmod</span> <span class="hljs-number">753</span> -r f01<br></code></pre></td></tr></table></figure>
+<p>例如：将文件 f01 的读、写、执行权限赋给所有用户。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">chmod</span> <span class="hljs-number">777</span> -r f01<br></code></pre></td></tr></table></figure>
+<h2 id="Linux-进程管理">Linux 进程管理</h2>
+<p>在 Linux 的应用中，我们需要对进程进行管理，如查看某个进程是否启动、以及在必要的时刻，杀掉某个线程。</p>
+<ul>
+<li><strong>查看进程命令：ps</strong></li>
+</ul>
+<p>ps 命令是 Linux 操作系统中查看进程的命令，通过 ps 命令我们可以查看 Linux 操作系统中正在运行的过程，并可以获得进程的 PID（进程的唯一标识），通过 PID 可以对进程进行相应的管理。</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs vim"><span class="hljs-keyword">ps</span> -ef | <span class="hljs-keyword">grep</span> [进程关键字]<br></code></pre></td></tr></table></figure>
+<p>根据进程关键词查看进程命令显示如下，显示的进程列表中第一列表示开启进程的用户，第二列表示进程唯一标识 PID，第三列表示父进程 PPID，第四列表示 CPU 占用资源比列，最后一列表示进程所执行程序的具体位置。</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs perl">[zheng@localhost ~]$ ps -ef|<span class="hljs-keyword">grep</span> sshd<br>root <span class="hljs-number">1829</span> <span class="hljs-number">1</span>  <span class="hljs-number">0</span> May2<span class="hljs-number">0</span> ?   <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span> /usr/sbin/sshd<br>shang <span class="hljs-number">24166</span> <span class="hljs-number">24100</span>  <span class="hljs-number">0</span>   <span class="hljs-number">20</span>:<span class="hljs-number">17</span> pts/<span class="hljs-number">2</span>  <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>      <span class="hljs-keyword">grep</span>  sshd<br>[zheng@localhost ~]$<br></code></pre></td></tr></table></figure>
+<ul>
+<li><strong>杀掉进程命令：kill</strong></li>
+</ul>
+<p>当系统中有进程进入死循环，或者需要被关闭时，我们可以使用 kill 命令对其关闭。</p>
+<p><code>kill -9 [PID]</code> PID 为 Linux 操作系统中进程的标识</p>
+<h2 id="Linux-其他常用命令大全">Linux 其他常用命令大全</h2>
+<ul>
+<li>清屏命令：clear</li>
+<li>查询命令详细参数命令：man</li>
+<li>挂载命令：mnt</li>
+<li>远程连接服务 SSH 相关命令：</li>
+<li>启动 SSH 服务命令：<code>service sshd start</code></li>
+<li>重启 SSH 服务命令：<code>service sshd restart</code></li>
+<li>关闭 SSH 服务命令：<code>service sshd stop</code></li>
+</ul>
+<p>Linux 大多数情况下都是远程服务器，开发者通过远程工具连接 Linux ，启动了某个项目的 JAR，一旦窗口关闭，JAR 也就停止运行了，因此一般通过如下命令启动 JAR：<code>nohup java -jar jar-0.0.1-SNAPSHOT.jar &amp;</code></p>
+<p>这里多了 nohup ，表示当前窗口关闭时服务不挂起，继续在后台运行</p>
+<h2 id="Linux-系统软件安装">Linux 系统软件安装</h2>
+<h3 id="常用软件安装">常用软件安装</h3>
+<p>Linux 下常用的软件安装方式有3种。</p>
+<ul>
+<li><strong>tar 安装</strong>：如果开发商提供的是 tar、tar.gz、<a target="_blank" rel="noopener" href="http://tar.bz">tar.bz</a> 格式的包（其中 tar 格式的为打包后没有压缩的包，gz 结尾的是按照 gzip 打包并压缩的软件包，<a target="_blank" rel="noopener" href="http://tar.bz">tar.bz</a> 是按照二进制方式打包并压缩的软件包），可以采用 tar 包安装，tar 安装方式本质上是解压软件开发商提供的软件包，之后在通过相应配置，完成软件的安装。</li>
+<li><strong>rpm 安装</strong>：rpm 安装方式是 redhat Linux 系列推出的一个软件包管理器，类似于 Windows 下的 exe 安装程序，可以直接使用 rpm 命令安装。</li>
+<li><strong>yum 安装</strong>：yum 安装本质上依然是 rpm 包安装，和 rpm 安装方式的不同之处是用户可以通过 yum 参数，指定安装的软件包，系统将自动从互联网上下载相应的 rpm 软件包。而无须用户关心软件包的下载地址，以及软件包的依赖关系。</li>
+</ul>
+<h3 id="软件安装常用命令">软件安装常用命令</h3>
+<ul>
+<li>
+<p>解压压缩命令：<code>tar</code></p>
+<ul>
+<li>
+<p>语法：<code>tar [选项] [压缩包]</code></p>
+</li>
+<li>
+<p>解压 gzip 包：<code>tar -zxvf [包名]</code></p>
+</li>
+<li>
+<p>解压 bz 包：<code>tar -jxvf [包名]</code></p>
+</li>
+<li>
+<p>解压普通包：<code>tar -xvf [包名]</code></p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-c</td>
+<td>指定特定目录压缩</td>
+</tr>
+<tr>
+<td>-x</td>
+<td>从备份文件中还原文件</td>
+</tr>
+<tr>
+<td>-t</td>
+<td>列出备份文件的内容</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>添加文件到已经压缩的文件</td>
+</tr>
+<tr>
+<td>-z</td>
+<td>有 gzip 属性的（后缀是 gz 的）</td>
+</tr>
+<tr>
+<td>-j</td>
+<td>有 bz2 属性的（后缀是 bz 的）</td>
+</tr>
+<tr>
+<td>-Z</td>
+<td>有 cpmpress 属性的</td>
+</tr>
+<tr>
+<td>-v</td>
+<td>显示所有进程</td>
+</tr>
+<tr>
+<td>-O</td>
+<td>将文件解压到标准输出</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>使用档案名称</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+<li>
+<p>安装卸载命令：<code>rpm</code></p>
+<ul>
+<li>
+<p>语法：<code>rpm [选项] [软件包]</code></p>
+</li>
+<li>
+<p>查询是否已经安装了某软件包：<code>rpm -qa|grep [软件包关键词]</code></p>
+</li>
+<li>
+<p>卸载已经安装的软件包：<code>rpm -e 软件包全名</code></p>
+</li>
+<li>
+<p>安装软件包并查看进度：<code>rpm -ivh 软件包路径</code></p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-ivh</td>
+<td>安装显示安装进度</td>
+</tr>
+<tr>
+<td>-Uvh</td>
+<td>升级软件包</td>
+</tr>
+<tr>
+<td>-qpl</td>
+<td>列出 rpm 软件包内的文件信息</td>
+</tr>
+<tr>
+<td>-qpi</td>
+<td>列出 rpm 软件包的描述信息</td>
+</tr>
+<tr>
+<td>-qf</td>
+<td>查找指定文件属于哪个 rpm 软件包</td>
+</tr>
+<tr>
+<td>-Va</td>
+<td>校验所有的 rpm 软件包，查找丢失的文件</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>删除包</td>
+</tr>
+<tr>
+<td>-qa</td>
+<td>查找已经安装的 rpm 包</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Linux/" class="category-chain-item">Linux</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Linux/" class="print-no-link">#Linux</a>
+      
+        <a href="/tags/Shell/" class="print-no-link">#Shell</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Linux 常用命令</div>
+      <div>https://zhengshuoo.github.io/posts/012-linux-common-commands</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zhengshuo</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年1月17日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - 相同方式共享">
+                    <i class="iconfont icon-sa"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/013-crontab-and-logrotate-log-clean" title="Linux 使用 Crontab + Logrotate 实现日志分割">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Linux 使用 Crontab + Logrotate 实现日志分割</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/011-root-cause-analyze" title="基于 Skywalking 根因分析设计与实现">
+                        <span class="hidden-mobile">基于 Skywalking 根因分析设计与实现</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+    <div id="giscus" class="giscus"></div>
+    <script type="text/javascript">
+      Fluid.utils.loadComments('#giscus', function() {
+        var options = {"repo":"zhengshuoo/zhengshuoo.github.io","repo-id":"R_kgDOH6cdug","category":"Announcements","category-id":"DIC_kwDOH6cdus4CTp9T","theme-light":"light","theme-dark":"dark","mapping":"title","reactions-enabled":1,"emit-metadata":0,"input-position":"top","lang":"zh-CN"};
+        var attributes = {};
+        for (let option in options) {
+          if (!option.startsWith('theme-')) {
+            var key = option.startsWith('data-') ? option : 'data-' + option;
+            attributes[key] = options[option];
+          }
+        }
+        var light = 'light';
+        var dark = 'dark';
+        window.GiscusThemeLight = light;
+        window.GiscusThemeDark = dark;
+        attributes['data-theme'] = document.documentElement.getAttribute('data-user-color-scheme') === 'dark' ? dark : light;
+        for (let attribute in attributes) {
+          var value = attributes[attribute];
+          if (value === undefined || value === null || value === '') {
+            delete attributes[attribute];
+          }
+        }
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://giscus.app/client.js');
+        s.setAttribute('crossorigin', 'anonymous');
+        for (let attribute in attributes) {
+          s.setAttribute(attribute, attributes[attribute]);
+        }
+        var ss = document.getElementsByTagName('script');
+        var e = ss.length > 0 ? ss[ss.length - 1] : document.head || document.documentElement;
+        e.parentNode.insertBefore(s, e.nextSibling);
+      });
+    </script>
+    <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  var relativeDate = function() {
+    var updatedTime = document.getElementById('updated-time');
+    if (updatedTime) {
+      var text = updatedTime.textContent;
+      var reg = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})/;
+      var matchs = text.match(reg);
+      if (matchs) {
+        var relativeTime = moment(matchs[0]).fromNow();
+        updatedTime.textContent = text.replace(reg, relativeTime);
+      }
+      updatedTime.style.display = '';
+    }
+  };
+  Fluid.utils.createScript('https://lib.baomitu.com/moment.js/2.29.4/moment.min.js', function() {
+    if (!'zh-cn'.startsWith('en')) {
+      Fluid.utils.createScript('https://lib.baomitu.com/moment.js/2.29.4/locale/zh-cn.min.js', function() {
+        relativeDate();
+      });
+    } else {
+      relativeDate();
+    }
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

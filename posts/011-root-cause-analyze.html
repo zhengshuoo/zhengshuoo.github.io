@@ -1,0 +1,1046 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=light>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-common/favicon.ico">
+  <link rel="icon" href="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-common/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#24292E">
+  <meta name="author" content="zhengshuo">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="微服务架构在独立部署、快速交付和灵活扩展上表现出极大的优势，但也会带来新的问题。服务间的调用关系变得异常复杂。当微服务架构出现系统性风险时，排查风险和故障诊断相比于传统的项目会更加困难。根因分析就是跟据服务和端点调用指标快速定位微服务应用问题的一种方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 Skywalking 根因分析设计与实现">
+<meta property="og:url" content="https://zhengshuoo.github.io/posts/011-root-cause-analyze">
+<meta property="og:site_name" content="zhengshuo">
+<meta property="og:description" content="微服务架构在独立部署、快速交付和灵活扩展上表现出极大的优势，但也会带来新的问题。服务间的调用关系变得异常复杂。当微服务架构出现系统性风险时，排查风险和故障诊断相比于传统的项目会更加困难。根因分析就是跟据服务和端点调用指标快速定位微服务应用问题的一种方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/11.jpg">
+<meta property="article:published_time" content="2022-08-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-13T16:05:02.000Z">
+<meta property="article:author" content="zhengshuo">
+<meta property="article:tag" content="Skywalking">
+<meta property="article:tag" content="根因分析">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/11.jpg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+    <meta name="baidu-site-verification" content="codeva-QuFa3S4GHG" /> <meta name="google-site-verification" content="23zD2hFhFjOC98QmAAxxDJ8E2biSoNa_yykpzNAnKgE" />
+  
+  <title>基于 Skywalking 根因分析设计与实现 - zhengshuo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/self.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zhengshuoo.github.io","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"Java"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"464cf562017aa54cff51ff112d8acc34","google":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"gtag":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+    <!-- Baidu Analytics -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?464cf562017aa54cff51ff112d8acc34";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="zhengshuo" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Zhengshuo&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/atom.xml" target="_self">
+                <i class="iconfont icon-rss"></i>
+                <span></span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/11.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="基于 Skywalking 根因分析设计与实现"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-08-28 00:00" pubdate>
+          2022年8月28日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          1.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          9 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Skywalking"
+        id="heading-ab311a9d8e1fbd19c2c8b0cdd7204bca" role="tab" data-toggle="collapse" href="#collapse-ab311a9d8e1fbd19c2c8b0cdd7204bca"
+        aria-expanded="true"
+      >
+        Skywalking
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-ab311a9d8e1fbd19c2c8b0cdd7204bca"
+           role="tabpanel" aria-labelledby="heading-ab311a9d8e1fbd19c2c8b0cdd7204bca">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/posts/011-root-cause-analyze" title="基于 Skywalking 根因分析设计与实现"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">基于 Skywalking 根因分析设计与实现</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">基于 Skywalking 根因分析设计与实现</h1>
+            
+              <p id="updated-time" class="note note-info" style="display: none">
+                
+                  
+                    本文最后更新于 2023-03-14T00:05:02+08:00
+                  
+                  
+
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <p>微服务架构在独立部署、快速交付和灵活扩展上表现出极大的优势，但也会带来新的问题。服务间的调用关系变得异常复杂。当微服务架构出现系统性风险时，排查风险和故障诊断相比于传统的项目会更加困难。根因分析就是跟据服务和端点调用指标快速定位微服务应用问题的一种方法。</p>
+<span id="more"></span>
+<h2 id="要解决的问题">要解决的问题</h2>
+<p>目前针对单台实例，我们已经有了灵犀诊断通过分析应用的堆、栈信息来快速分析实例问题，但随着微服务应用越来越多，服务间调用越来越复杂，如何快速定位到实例或者服务维度为题成为一个亟需解决的问题。</p>
+<h2 id="概念">概念</h2>
+<p><img src="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-history/011-root-cause-analyze/20220830214836-20220901214609758.png" srcset="/img/loading.gif" lazyload alt="image-20220830162456964"></p>
+<p>根据上图可以了解到一个应用除了本地调用之外、还会有远程调用（DB、Redis、HTTP、MQ等），而HTTP、DUBBO远程调用又会关联到服务端应用，基于这样的关系，一个完整的微服务调用链路就可以串联起来，我们就可以根据这些关系去做根因分析。</p>
+<p>为了解决实现根因分析，我们需要掌握以下一些概念：</p>
+<h3 id="入口端点">入口端点</h3>
+<p>一个业务服务处理事务入口成为入口端点</p>
+<ul>
+<li>HTTP/Dubbo</li>
+<li>MQ 消费处理入口（包含Kafka，RocketMQ，RabbitMQ）</li>
+<li>调度 Job 入口（调度系统，Spring Task，ScheduledThreadPoolExecutor等等）</li>
+</ul>
+<h3 id="出口端点">出口端点</h3>
+<p>每个入口端点都包含本地操作（Local）以及远程操作，远程操作对应的即为出口端点</p>
+<ul>
+<li>HTTP / Dubbo 调用出口</li>
+<li>MQ 消息发送出口（包含Kafka，RocketMQ，RabbitMQ）</li>
+<li>数据库读写调用出口（包含MySQL， MongoDB，Redis，Elasticsearch，HBase等等）</li>
+</ul>
+<h3 id="指标">指标</h3>
+<ul>
+<li>应用所有入口端点的【耗时】和【成功率】</li>
+<li>每个入口端点之后的每种操作的【耗时】和【成功率】</li>
+</ul>
+<h2 id="指标收集">指标收集</h2>
+<h3 id="指标类型">指标类型</h3>
+<p>基于skywalking上报的segment数据，我们可以很轻易的获取到上述入口端点、出口端点、Local的指标数据</p>
+<p>简单抽象成如下几种类型：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>指标名</th>
+<th>labels</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>入口</td>
+<td>rca_entry_duration、rca_entry_error_rate</td>
+<td>service：服务、entry：入口端点</td>
+</tr>
+<tr>
+<td>Dubbo</td>
+<td>rca_exit_dubbo_duration、rca_exit_dubbo_error_rate</td>
+<td>entry: 入口端点、exit：出口端点</td>
+</tr>
+<tr>
+<td>HTTP</td>
+<td>rca_exit_http_duration、rca_exit_http_error_rate</td>
+<td>entry: 入口端点、address：远程地址</td>
+</tr>
+<tr>
+<td>MySQL</td>
+<td>rca_exit_mysql_duration、rca_exit_mysql_error_rate</td>
+<td>entry: 入口端点、address：远程地址</td>
+</tr>
+<tr>
+<td>MongoDB</td>
+<td>rca_exit_mongodb_duration、rca_exit_mongodb_error_rate</td>
+<td>entry: 入口端点、address：远程地址</td>
+</tr>
+<tr>
+<td>Hbase</td>
+<td>rca_exit_hbase_duration、rca_exit_hbase_error_rate</td>
+<td>entry: 入口端点、address：远程地址</td>
+</tr>
+<tr>
+<td>Elasticsearch</td>
+<td>rca_exit_es_duration、rca_exit_es_error_rate</td>
+<td>entry: 入口端点、address：远程地址</td>
+</tr>
+<tr>
+<td>RocketMQ</td>
+<td>rca_exit_rocketmq_duration、rca_exit_rocketmq_error_rate</td>
+<td>entry: 入口端点、address：远程地址</td>
+</tr>
+<tr>
+<td>RabbitMQ</td>
+<td>rca_exit_rabbitmq_duration、rca_exit_rabbitmq_error_rate</td>
+<td>entry: 入口端点、address：远程地址</td>
+</tr>
+<tr>
+<td>Kafka</td>
+<td>rca_exit_kafka_duration、rca_exit_kafka_error_rate</td>
+<td>entry: 入口端点、address：远程地址</td>
+</tr>
+</tbody>
+</table>
+<h3 id="端点格式调整">端点格式调整</h3>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">com.qihoo.xxxFacade.xxxMethod --&gt; demo-app.xxxFacade.xxxMethod<br></code></pre></td></tr></table></figure>
+<ul>
+<li>
+<p>通过端点即可知道是哪个服务，减少指标label</p>
+</li>
+<li>
+<p>与CAT数据格式保持一致，方便后续与CAT打通</p>
+</li>
+</ul>
+<h3 id="指标收集架构图">指标收集架构图</h3>
+<p>由于要对skywalking数据二次处理，同时又要保证skywalking能正常运行、因此采用流量复制方案，一份流量打到skywalking-oap、一份到skywalking-bridge（自建bridge）。</p>
+<p><img src="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-history/011-root-cause-analyze/20220830214826.png" srcset="/img/loading.gif" lazyload alt="image-20220830163208808"></p>
+<ol>
+<li>客户端skywalking-agent通过grpc上报segment数据到skywalking-gateway（Nginx）</li>
+<li>Nginx拦截segment流量转发到skywalking-bridge，其他流量依旧到skywalking-oap</li>
+<li>skywalking-bridge通过kafka转发segment数据到skywalking-oap，以保证skywalking正常运行</li>
+<li>skywalking-bridge通过kafka转发segment数据到flink进行流式处理，flink会把解析segment数据为span并按分钟进行聚合处理生成指标数据</li>
+<li>flink处理生成的指标数据通过kafka转发到skywalking-bridge</li>
+<li>skywalking-bridge把指标数据保存到VictoraMetric时序数据库中</li>
+<li>lingxi-diagnotor从VictoraMetric中获取数据进行根因分析</li>
+</ol>
+<h2 id="根因分析">根因分析</h2>
+<h3 id="方案">方案</h3>
+<p>我们如何知道一个服务有问题，通常情况下需要看监控大盘，观看上面的指标是否有抖动，耗时是否增加、成功率是否上升等。</p>
+<p>什么叫抖动？某个服务耗时 500ms，某个 RPC 环节耗时 250ms，那么这个 RPC 环节一定是有问题的吗？不一定，必须要跟它正常情况进行一个对比才能知道它的这个耗时是否正常。所以需要一个正常水准，然后基于正常水准的对比才能确定某个环节是否抖动了。</p>
+<p>所以我们方案的前提就是：</p>
+<blockquote>
+<p>需要有准确的异常开始时间，异常开始前一段时间范围要正常，基于前一段时间抖动程度来判定识别后一半时间范围的抖动是否为异常抖动</p>
+</blockquote>
+<p>然而不通应用不同端点耗时、成功率都有所不同，1ms-&gt;3ms上升200%，100ms-&gt;200ms上升100%，两组数据哪个有问题呢，可能后者问题更大。那么环比正常数据什么样的阈值才是有问题的，我们不可能针对每个应用每个端点去设置阈值，需要一个能够评判的标准，标准差应运而生。</p>
+<ul>
+<li><strong>方差</strong>是在概率论和统计方差衡量随机变量或一组数据时离散程度的度量。是每个样本值与全体样本值的平均数之差的平方值的平均数。</li>
+<li>**标准差（Standard Deviation） **是离均差平方的算术平均数（即：方差）的算术平方根，用σ表示。标准差也被称为标准偏差，或者实验标准差，在概率统计中最常使用作为统计分布程度上的测量依据。</li>
+</ul>
+<p>方差和标准差都是对一组(一维)数据进行统计的，反映的是一维数组的离散程度。</p>
+<p>标准差和均值的量纲（单位）是一致的，在描述一个波动范围是标准差比方差更方便。比如一个班男生的平均身高是170cm,标准差是10cm,那么方差就是10cm^2。可以进行的比较简便的描述是本班男生身高分布是170±10cm，方差就无法做到这点。</p>
+<h3 id="实现逻辑">实现逻辑</h3>
+<p><img src="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-history/011-root-cause-analyze/20220830214816.png" srcset="/img/loading.gif" lazyload alt="image-20220830163352915"></p>
+<ol>
+<li>计算入口端点前一个小时（可配置）正常数据的标准差A1，要分析时间范围的目标数据标准差A2</li>
+<li>当A2是A1的3倍还多时（可配置），则认为端点抖动，可能有异常，下钻分析Local、Dubbo、Mysql、Redis指标
+<ul>
+<li>耗时：当目标数据最大值&lt;正常数据平均值+A1，则过滤掉（去除向下波动数据）</li>
+<li>失败率：当目标数据最小值&lt;正常数据平局值+A1，则过滤掉（去除向下波动数据）</li>
+</ul>
+</li>
+<li>计算下钻指标前一个小时（可配置）正常数g准的标准差B1，和要分析时间范围的目标数据标准差B2</li>
+<li>当B2是B1的3倍还多时（可配置），则认为指标波动，可能有异常</li>
+<li>当指标为Dubbo是，记录客户端端点，继续递归分析</li>
+</ol>
+<h3 id="流程图">流程图</h3>
+<p><img src="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-history/011-root-cause-analyze/20220830214805.png" srcset="/img/loading.gif" lazyload alt="image-20220830163244919"></p>
+<h3 id=""></h3>
+<h2 id="后续工作">后续工作</h2>
+<ul>
+<li>
+<p>考虑接入CAT，丰富指标，增加准确性</p>
+</li>
+<li>
+<p>考虑接入GC、CPU、Memory等指标，当分析出Local问题时能够精确给出因为什么原因导致</p>
+</li>
+<li>
+<p>Metrics和调用链查询联动</p>
+</li>
+</ul>
+<h2 id="参考">参考</h2>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://my.oschina.net/pingpangkuangmo/blog/4334872">https://my.oschina.net/pingpangkuangmo/blog/4334872</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/407298025">https://zhuanlan.zhihu.com/p/407298025</a></li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Skywalking/" class="category-chain-item">Skywalking</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Skywalking/" class="print-no-link">#Skywalking</a>
+      
+        <a href="/tags/%E6%A0%B9%E5%9B%A0%E5%88%86%E6%9E%90/" class="print-no-link">#根因分析</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>基于 Skywalking 根因分析设计与实现</div>
+      <div>https://zhengshuoo.github.io/posts/011-root-cause-analyze</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zhengshuo</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年8月28日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - 相同方式共享">
+                    <i class="iconfont icon-sa"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/012-linux-common-commands" title="Linux 常用命令">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Linux 常用命令</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/010-log-system" title="Java日志体系">
+                        <span class="hidden-mobile">Java日志体系</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+    <div id="giscus" class="giscus"></div>
+    <script type="text/javascript">
+      Fluid.utils.loadComments('#giscus', function() {
+        var options = {"repo":"zhengshuoo/zhengshuoo.github.io","repo-id":"R_kgDOH6cdug","category":"Announcements","category-id":"DIC_kwDOH6cdus4CTp9T","theme-light":"light","theme-dark":"dark","mapping":"title","reactions-enabled":1,"emit-metadata":0,"input-position":"top","lang":"zh-CN"};
+        var attributes = {};
+        for (let option in options) {
+          if (!option.startsWith('theme-')) {
+            var key = option.startsWith('data-') ? option : 'data-' + option;
+            attributes[key] = options[option];
+          }
+        }
+        var light = 'light';
+        var dark = 'dark';
+        window.GiscusThemeLight = light;
+        window.GiscusThemeDark = dark;
+        attributes['data-theme'] = document.documentElement.getAttribute('data-user-color-scheme') === 'dark' ? dark : light;
+        for (let attribute in attributes) {
+          var value = attributes[attribute];
+          if (value === undefined || value === null || value === '') {
+            delete attributes[attribute];
+          }
+        }
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://giscus.app/client.js');
+        s.setAttribute('crossorigin', 'anonymous');
+        for (let attribute in attributes) {
+          s.setAttribute(attribute, attributes[attribute]);
+        }
+        var ss = document.getElementsByTagName('script');
+        var e = ss.length > 0 ? ss[ss.length - 1] : document.head || document.documentElement;
+        e.parentNode.insertBefore(s, e.nextSibling);
+      });
+    </script>
+    <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  var relativeDate = function() {
+    var updatedTime = document.getElementById('updated-time');
+    if (updatedTime) {
+      var text = updatedTime.textContent;
+      var reg = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})/;
+      var matchs = text.match(reg);
+      if (matchs) {
+        var relativeTime = moment(matchs[0]).fromNow();
+        updatedTime.textContent = text.replace(reg, relativeTime);
+      }
+      updatedTime.style.display = '';
+    }
+  };
+  Fluid.utils.createScript('https://lib.baomitu.com/moment.js/2.29.4/moment.min.js', function() {
+    if (!'zh-cn'.startsWith('en')) {
+      Fluid.utils.createScript('https://lib.baomitu.com/moment.js/2.29.4/locale/zh-cn.min.js', function() {
+        relativeDate();
+      });
+    } else {
+      relativeDate();
+    }
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
