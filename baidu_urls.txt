@@ -1,4 +1,3 @@
-https://zhengshuoo.github.io/posts/019-time-complexity
 https://zhengshuoo.github.io/posts/018-rocketmq-acl
 https://zhengshuoo.github.io/posts/017-doris-on-yarn
 https://zhengshuoo.github.io/posts/016-helm-Practice

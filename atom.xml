@@ -6,7 +6,7 @@
   <link href="https://zhengshuoo.github.io/atom.xml" rel="self"/>
   
   <link href="https://zhengshuoo.github.io/"/>
-  <updated>2024-01-25T09:29:55.925Z</updated>
+  <updated>2024-01-25T09:31:43.194Z</updated>
   <id>https://zhengshuoo.github.io/</id>
   
   <author>
@@ -15,34 +15,6 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title></title>
-    <link href="https://zhengshuoo.github.io/posts/019-time-complexity"/>
-    <id>https://zhengshuoo.github.io/posts/019-time-complexity</id>
-    <published>2024-01-25T09:28:08.934Z</published>
-    <updated>2024-01-25T09:29:55.925Z</updated>
-    
-    <content type="html"><![CDATA[<hr><p>title: 常用数据结构操作与算法的复杂度<br>typora-root-url: …/…/source<br>tags:</p><ul><li>Algorithm<br>categories:</li><li>Algorithm<br>banner_img: ‘<a href="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/19.jpg">https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/19.jpg</a>’<br>index_img: ‘<a href="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/19.jpg">https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/blog-cover/19.jpg</a>’<br>date: 2024-01-25 00:00:00</li></ul><hr><p>在描述算法复杂度时，经常用到O(1), O(n), O(logn), O(nlogn), O(n^2), 其中的n代表输入数据的量来对应<code>时间复杂度</code>或者<code>空间复杂度</code></p><ul><li>如果ax=N（a&gt;0，且a≠1），那么数x叫做以a为底N的对数，记作x=logaN，读作以a为底N的对数，其中a叫做对数的底数，N叫做真数。</li></ul><h2 id="常用数据结构操作与算法的复杂度">常用数据结构操作与算法的复杂度</h2><p><img src="https://zheng-1259265883.cos.ap-guangzhou.myqcloud.com/img/20240125172834.jpeg" alt=""></p><h2 id="参考">参考</h2><ol><li><a href="https://imgur.com/gallery/7tIk0/comment/727923588">https://imgur.com/gallery/7tIk0/comment/727923588</a></li></ol>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;hr&gt;
-&lt;p&gt;title: 常用数据结构操作与算法的复杂度&lt;br&gt;
-typora-root-url: …/…/source&lt;br&gt;
-tags:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Algorithm&lt;br&gt;
-categories:&lt;/li&gt;
-&lt;li&gt;Algorithm&lt;br&gt;
-banne</summary>
-      
-    
-    
-    
-    
-  </entry>
   
   <entry>
     <title>RocketMQ ACL</title>
@@ -185,9 +157,9 @@ banne</summary>
     <category term="Linux" scheme="https://zhengshuoo.github.io/categories/Linux/"/>
     
     
-    <category term="Linux" scheme="https://zhengshuoo.github.io/tags/Linux/"/>
-    
     <category term="Log" scheme="https://zhengshuoo.github.io/tags/Log/"/>
+    
+    <category term="Linux" scheme="https://zhengshuoo.github.io/tags/Linux/"/>
     
     <category term="Docker" scheme="https://zhengshuoo.github.io/tags/Docker/"/>
     
